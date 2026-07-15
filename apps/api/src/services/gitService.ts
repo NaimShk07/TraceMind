@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import simpleGit, { SimpleGit } from 'simple-git';
+import { simpleGit } from 'simple-git';
+import type { SimpleGit } from 'simple-git';
 import type { CommitMetadata, CommitDetails } from '@tracemind/shared';
 import { BadRequestError, NotFoundError } from '../utils/errors.js';
 
@@ -56,43 +57,83 @@ export class GitService {
    */
   public async getCommitHistory(
     repoPath: string,
-    options: { page?: number; limit?: number } = {}
+    options: { page?: number; limit?: number; search?: string } = {}
   ): Promise<CommitMetadata[]> {
     const git = this.getGitInstance(repoPath);
     const page = options.page || 1;
     const limit = options.limit || 50;
     const skip = (page - 1) * limit;
+    const search = options.search?.trim();
 
     try {
-      const logResult = await git.log({
-        maxCount: limit,
-        skip,
-      });
+      if (search) {
+        // Fetch candidate commits (up to 100) to search on
+        const logResult = await git.log([`--max-count=100`]);
 
-      // Map simple-git log items to CommitMetadata. 
-      // We will perform a fast concurrent lookup for changed files counts.
-      const commits = await Promise.all(
-        logResult.all.map(async (commit) => {
-          let filesChangedCount = 0;
-          try {
-            // Retrieve list of changed files for filesChangedCount calculation
-            const filesRaw = await git.show(['--name-only', '--pretty=format:', commit.hash]);
-            filesChangedCount = filesRaw.trim().split('\n').filter(Boolean).length;
-          } catch {
-            // Fail silently and leave as 0
-          }
+        const mappedCommits = await Promise.all(
+          logResult.all.map(async (commit) => {
+            let filesChanged: string[] = [];
+            try {
+              const filesRaw = await git.show(['--name-only', '--pretty=format:', commit.hash]);
+              filesChanged = filesRaw.trim().split('\n').filter(Boolean);
+            } catch {
+              // Fail silently
+            }
 
-          return {
-            hash: commit.hash,
-            author: commit.author_name,
-            date: commit.date,
-            message: commit.message,
-            filesChangedCount,
-          };
-        })
-      );
+            return {
+              hash: commit.hash,
+              author: commit.author_name,
+              date: commit.date,
+              message: commit.message,
+              filesChangedCount: filesChanged.length,
+              filesChanged,
+            };
+          })
+        );
 
-      return commits;
+        const searchLower = search.toLowerCase();
+        const filtered = mappedCommits.filter((commit) => {
+          const matchMsg = commit.message.toLowerCase().includes(searchLower);
+          const matchAuthor = commit.author.toLowerCase().includes(searchLower);
+          const matchHash = commit.hash.toLowerCase().includes(searchLower);
+          const matchFiles = commit.filesChanged.some((file) =>
+            file.toLowerCase().includes(searchLower)
+          );
+          return matchMsg || matchAuthor || matchHash || matchFiles;
+        });
+
+        // Apply slice pagination
+        const sliced = filtered.slice(skip, skip + limit);
+        // Exclude full filesChanged array from output metadata object
+        return sliced.map(({ filesChanged, ...rest }) => rest);
+      } else {
+        const logResult = await git.log([
+          `--max-count=${limit}`,
+          `--skip=${skip}`,
+        ]);
+
+        const commits = await Promise.all(
+          logResult.all.map(async (commit) => {
+            let filesChangedCount = 0;
+            try {
+              const filesRaw = await git.show(['--name-only', '--pretty=format:', commit.hash]);
+              filesChangedCount = filesRaw.trim().split('\n').filter(Boolean).length;
+            } catch {
+              // Fail silently
+            }
+
+            return {
+              hash: commit.hash,
+              author: commit.author_name,
+              date: commit.date,
+              message: commit.message,
+              filesChangedCount,
+            };
+          })
+        );
+
+        return commits;
+      }
     } catch (err: any) {
       throw new BadRequestError(`Failed to fetch commit history: ${err.message}`);
     }
@@ -105,8 +146,7 @@ export class GitService {
   public async getCommit(repoPath: string, hash: string): Promise<CommitDetails> {
     const git = this.getGitInstance(repoPath);
     try {
-      // Get commit log details
-      const logResult = await git.log({ maxCount: 1, from: hash });
+      const logResult = await git.log(['-n', '1', hash]);
       const commit = logResult.latest;
       if (!commit) {
         throw new NotFoundError(`Commit "${hash}" not found in repository`);
@@ -172,7 +212,7 @@ export class GitService {
   public async getFileHistory(repoPath: string, filePath: string): Promise<CommitMetadata[]> {
     const git = this.getGitInstance(repoPath);
     try {
-      const logResult = await git.log({ file: filePath });
+      const logResult = await git.log(['--', filePath]);
 
       const commits = await Promise.all(
         logResult.all.map(async (commit) => {

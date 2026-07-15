@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, Outlet, useLocation, useSearchParams } from 'react-router-dom';
 import { 
   Compass, 
   GitBranch, 
@@ -14,12 +14,66 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import type { HealthResponse } from '@tracemind/shared';
+import type { HealthResponse, CommitDetails } from '@tracemind/shared';
+
+const renderDiffLine = (line: string, index: number) => {
+  if (line.startsWith('+') && !line.startsWith('+++')) {
+    return (
+      <div key={index} className="bg-emerald-950/20 text-emerald-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-emerald-500 select-text">
+        {line}
+      </div>
+    );
+  }
+  if (line.startsWith('-') && !line.startsWith('---')) {
+    return (
+      <div key={index} className="bg-red-950/20 text-red-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-red-500 select-text">
+        {line}
+      </div>
+    );
+  }
+  if (line.startsWith('@@')) {
+    return (
+      <div key={index} className="bg-purple-950/10 text-purple-400 font-mono text-[10px] py-0.5 px-3 font-semibold select-text">
+        {line}
+      </div>
+    );
+  }
+  return (
+    <div key={index} className="text-gray-400 font-mono text-[10px] py-0.5 px-3 select-text">
+      {line}
+    </div>
+  );
+};
 
 export default function Layout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const commitHash = searchParams.get('commit');
+
+  // Query commit details if a hash is selected
+  const { data: commitResponse, isLoading: isCommitLoading, isError: isCommitError } = useQuery<{
+    success: boolean;
+    data: CommitDetails;
+  }>({
+    queryKey: ['commit', commitHash],
+    queryFn: async () => {
+      const res = await fetch(`http://localhost:3001/commits/${commitHash}`);
+      if (!res.ok) throw new Error('Failed to fetch commit');
+      return res.json();
+    },
+    enabled: !!commitHash,
+  });
+
+  const commit = commitResponse?.data;
+
+  // Auto-open inspector panel when a commit is selected
+  useEffect(() => {
+    if (commitHash) {
+      setInspectorOpen(true);
+    }
+  }, [commitHash]);
 
   // Keep a global connection monitor in the header
   const { data, isError } = useQuery<{ success: boolean; data: HealthResponse }>({
@@ -187,41 +241,153 @@ export default function Layout() {
           {/* 3. Right Inspector Panel */}
           <aside className={`
             border-l border-[#1e2030] bg-[#0c0d14] flex flex-col shrink-0 overflow-y-auto transition-all duration-200
-            ${inspectorOpen ? 'w-80 p-6 opacity-100' : 'w-0 p-0 opacity-0 border-l-0'}
+            ${inspectorOpen ? (commit ? 'w-[450px] p-6 opacity-100' : 'w-80 p-6 opacity-100') : 'w-0 p-0 opacity-0 border-l-0'}
             hidden md:flex
           `}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">Inspector Panel</h2>
-                <FileText className="w-4 h-4 text-purple-400" />
-              </div>
-              <p className="text-[11px] text-gray-400 leading-normal">
-                This panel displays evidence, commit details, confidence levels, and context matching your AI investigations.
-              </p>
-              
-              <div className="p-4 rounded-lg border border-[#1e2030] bg-[#090a0f] text-xs space-y-2">
-                <div className="font-semibold text-white">Quick Guide:</div>
-                <ul className="list-disc pl-4 space-y-1 text-[#838b9c]">
-                  <li>Navigate to <b>Repositories</b> to specify a Git path.</li>
-                  <li>Go to <b>Timeline</b> to inspect commits.</li>
-                  <li>Use <b>AI Investigation</b> to analyze root causes.</li>
-                </ul>
-              </div>
-
-              <div className="pt-4 border-t border-[#1e2030]/50 space-y-2">
-                <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Session Details</div>
-                <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Env:</span>
-                    <span className="text-white">development</span>
+            {commitHash ? (
+              <div className="flex-1 flex flex-col space-y-4 min-w-0">
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-[#1e2030]">
+                  <div className="flex items-center gap-2">
+                    <GitCommit className="w-4 h-4 text-purple-400" />
+                    <h2 className="text-xs font-semibold text-white tracking-wider uppercase font-mono">
+                      Commit Details
+                    </h2>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Storage:</span>
-                    <span className="text-purple-400">In-Memory Cache</span>
+                  <button 
+                    onClick={() => setSearchParams({})}
+                    className="text-gray-500 hover:text-white p-1 rounded hover:bg-[#161722] cursor-pointer transition-colors"
+                    title="Close Details"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {isCommitLoading && (
+                  <div className="space-y-3 pt-4 animate-pulse">
+                    <div className="h-4 w-24 bg-[#1e2030] rounded" />
+                    <div className="h-10 w-full bg-[#1e2030] rounded" />
+                    <div className="h-40 w-full bg-[#1e2030] rounded" />
+                  </div>
+                )}
+
+                {isCommitError && (
+                  <div className="p-3 bg-red-950/20 border border-red-900/30 rounded text-[11px] text-red-300">
+                    Failed to fetch details for commit <code>{commitHash.substring(0, 7)}</code>.
+                  </div>
+                )}
+
+                {commit && (
+                  <div className="flex-1 flex flex-col min-w-0 space-y-4">
+                    {/* Metadata list */}
+                    <div className="bg-[#090a0f] p-3.5 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Hash:</span>
+                        <span className="text-purple-400 font-semibold select-all">{commit.hash}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Author:</span>
+                        <span className="text-gray-300">{commit.author}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Date:</span>
+                        <span className="text-gray-300">{new Date(commit.date).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Commit Message */}
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Message</div>
+                      <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] text-xs text-white whitespace-pre-wrap leading-relaxed">
+                        {commit.message}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="space-y-1.5">
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Impact Stats</div>
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
+                        <div className="bg-emerald-950/15 border border-emerald-900/35 py-2 rounded-lg">
+                          <div className="text-emerald-400 font-bold">+{commit.stats.additions}</div>
+                          <div className="text-[9px] text-gray-500 pt-0.5 uppercase">additions</div>
+                        </div>
+                        <div className="bg-red-950/15 border border-red-900/35 py-2 rounded-lg">
+                          <div className="text-red-400 font-bold">-{commit.stats.deletions}</div>
+                          <div className="text-[9px] text-gray-500 pt-0.5 uppercase">deletions</div>
+                        </div>
+                        <div className="bg-purple-950/15 border border-purple-900/35 py-2 rounded-lg">
+                          <div className="text-purple-400 font-bold">{commit.stats.filesChanged}</div>
+                          <div className="text-[9px] text-gray-500 pt-0.5 uppercase">files</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Changed Files */}
+                    <div className="space-y-1.5 flex flex-col min-h-0">
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Modified Files</div>
+                      <div className="bg-[#090a0f] border border-[#1e2030] rounded-lg p-2.5 max-h-36 overflow-y-auto space-y-1">
+                        {commit.filesChanged.map((file) => (
+                          <div key={file} className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300 hover:text-white truncate">
+                            <span className="text-purple-400/80">•</span>
+                            <span className="truncate" title={file}>{file}</span>
+                          </div>
+                        ))}
+                        {commit.filesChanged.length === 0 && (
+                          <div className="text-[10px] text-gray-600 italic">No files modified.</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Diff View */}
+                    <div className="space-y-1.5 flex-1 flex flex-col min-h-0">
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Unified Diff</div>
+                      <div className="flex-1 border border-[#1e2030] bg-[#090a0f] rounded-lg overflow-hidden flex flex-col min-h-[220px]">
+                        <div className="flex-1 overflow-y-auto py-2 whitespace-pre select-text">
+                          {commit.diff ? (
+                            commit.diff.split('\n').map(renderDiffLine)
+                          ) : (
+                            <div className="text-[10px] text-gray-600 italic px-3 py-1">No diff content.</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">Inspector Panel</h2>
+                  <FileText className="w-4 h-4 text-purple-400" />
+                </div>
+                <p className="text-[11px] text-gray-400 leading-normal">
+                  This panel displays evidence, commit details, confidence levels, and context matching your AI investigations.
+                </p>
+                
+                <div className="p-4 rounded-lg border border-[#1e2030] bg-[#090a0f] text-xs space-y-2">
+                  <div className="font-semibold text-white">Quick Guide:</div>
+                  <ul className="list-disc pl-4 space-y-1 text-[#838b9c]">
+                    <li>Navigate to <b>Repositories</b> to specify a Git path.</li>
+                    <li>Go to <b>Timeline</b> to inspect commits.</li>
+                    <li>Use <b>AI Investigation</b> to analyze root causes.</li>
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t border-[#1e2030]/50 space-y-2">
+                  <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Session Details</div>
+                  <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Env:</span>
+                      <span className="text-white">development</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Storage:</span>
+                      <span className="text-purple-400">In-Memory Cache</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </aside>
         </div>
 

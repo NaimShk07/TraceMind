@@ -1,14 +1,11 @@
+import 'dotenv/config';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
 import requestLogger from './middlewares/requestLogger.js';
 import errorHandler from './middlewares/errorHandler.js';
 import apiRouter from './routes/index.js';
 import { NotFoundError } from './utils/errors.js';
 import logger from './utils/logger.js';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
