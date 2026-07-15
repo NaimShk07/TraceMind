@@ -1,0 +1,16 @@
+{
+  "name": "tracemind",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"@tracemind/*\" dev",
+    "build": "pnpm --recursive build",
+    "test": "pnpm --recursive test",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "prettier": "^3.4.2",
+    "eslint": "^9.18.0"
+  }
+}
