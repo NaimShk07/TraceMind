@@ -15,7 +15,7 @@ Backend
 - TypeScript
 - Zod
 - simple-git
-- OpenAI SDK
+- OpenAI SDK / Gemini
 
 Database
 - None for MVP

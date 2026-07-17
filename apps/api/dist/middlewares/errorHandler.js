@@ -1,3 +1,4 @@
+import { ZodError } from 'zod';
 import { AppError } from '../utils/errors.js';
 import logger from '../utils/logger.js';
 export const errorHandler = (err, req, res, 
@@ -6,7 +7,15 @@ next) => {
     let statusCode = 500;
     let code = 'INTERNAL_SERVER_ERROR';
     let message = 'An unexpected error occurred';
-    if (err instanceof AppError) {
+    let details = undefined;
+    if (err instanceof ZodError) {
+        statusCode = 400;
+        code = 'VALIDATION_ERROR';
+        message = 'Invalid request payload';
+        details = err.errors.map((e) => ({ field: e.path.join('.'), message: e.message }));
+        logger.warn(`Validation Error: ${message}`, { issues: err.errors.length });
+    }
+    else if (err instanceof AppError) {
         statusCode = err.statusCode;
         code = err.code;
         message = err.message;
@@ -25,6 +34,7 @@ next) => {
         error: {
             code,
             message,
+            ...(details ? { details } : {}),
         },
     });
 };

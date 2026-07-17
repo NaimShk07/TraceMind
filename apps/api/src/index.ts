@@ -27,8 +27,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(errorHandler);
 
 // Start Server
-app.listen(port, () => {
-  logger.info(`TraceMind API successfully started and listening on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    logger.info(`TraceMind API successfully started and listening on port ${port}`);
+  });
+}
 
 export default app;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
 import { 
@@ -32,7 +32,7 @@ const highlightText = (text: string, query: string) => {
         part.toLowerCase() === query.trim().toLowerCase() ? (
           <mark
             key={i}
-            className="bg-purple-500/25 text-purple-200 rounded px-1 py-0.5 border border-purple-500/35 select-text font-medium"
+            className="bg-purple-500/25 text-purple-200 rounded px-1 py-0.5 border border-purple-500/35 select-text font-medium animate-fadeIn"
           >
             {part}
           </mark>
@@ -48,6 +48,29 @@ export default function Timeline() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCommitHash = searchParams.get('commit');
   const [search, setSearch] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard Shortcuts: Press / or Cmd+K to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing inside input or textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.tagName === 'SELECT'
+      ) {
+        return;
+      }
+
+      if (e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 1. Fetch active repository details
   const { data: activeRepoData, isLoading: isRepoLoading, isError: isRepoError } = useQuery<{
@@ -149,7 +172,7 @@ export default function Timeline() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slideUp">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -170,11 +193,12 @@ export default function Timeline() {
           <Search className="w-4 h-4" />
         </span>
         <input
+          ref={searchInputRef}
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by message, author, hash, or filename..."
-          className="w-full bg-[#0c0d14] border border-[#1e2030] text-xs text-white rounded-md pl-10 pr-10 py-2.5 hover:border-[#2e3045] focus:outline-none focus:border-purple-500/80 transition-colors"
+          placeholder="Search... (Press '/' or 'Cmd+K' to focus)"
+          className="w-full bg-[#0c0d14] border border-[#1e2030] text-xs text-white rounded-md pl-10 pr-10 py-2.5 hover:border-[#2e3045] focus:outline-none focus:border-purple-500/80 transition-colors placeholder:text-gray-600"
         />
         {search && (
           <button 
@@ -189,9 +213,22 @@ export default function Timeline() {
 
       {/* Loading Commits Placeholder */}
       {isCommitsLoading && (
-        <div className="space-y-4 max-w-3xl pt-4">
-          <div className="h-24 bg-[#0c0d14] rounded border border-[#1e2030] animate-pulse" />
-          <div className="h-24 bg-[#0c0d14] rounded border border-[#1e2030] animate-pulse" />
+        <div className="relative border-l border-[#1e2030] ml-3 pl-6 space-y-6 max-w-3xl pt-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="relative animate-pulse">
+              {/* Timeline dot */}
+              <div className="absolute -left-[31px] top-1.5 w-4.5 h-4.5 rounded-full border-4 border-[#090a0f] bg-[#1e2030]" />
+              {/* Card wrapper */}
+              <div className="p-4 rounded-lg border border-[#1e2030] bg-[#0c0d14]/40 space-y-3">
+                <div className="flex justify-between items-center">
+                  <div className="h-3 w-16 bg-[#1e2030] rounded" />
+                  <div className="h-3 w-20 bg-[#1e2030] rounded" />
+                </div>
+                <div className="h-4 w-3/4 bg-[#1e2030] rounded" />
+                <div className="h-3 w-1/2 bg-[#1e2030] rounded pt-2 border-t border-[#1e2030]/50" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -227,7 +264,7 @@ export default function Timeline() {
               {/* Commit Item Container */}
               <div 
                 onClick={() => setSearchParams({ commit: commit.hash })}
-                className={`p-4 rounded-lg border transition-all space-y-2.5 cursor-pointer
+                className={`p-4 rounded-lg border transition-all space-y-2.5 cursor-pointer animate-fadeIn
                   ${activeCommitHash === commit.hash 
                     ? 'bg-[#161722] border-purple-500/80 shadow-md shadow-purple-500/5' 
                     : 'bg-[#0c0d14] border-[#1e2030] hover:border-purple-500/30'

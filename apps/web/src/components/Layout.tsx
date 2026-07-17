@@ -75,6 +75,21 @@ export default function Layout() {
     }
   }, [commitHash]);
 
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSearchParams({});
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setSearchParams]);
+
   // Keep a global connection monitor in the header
   const { data, isError } = useQuery<{ success: boolean; data: HealthResponse }>({
     queryKey: ['health'],

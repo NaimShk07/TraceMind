@@ -106,7 +106,7 @@ Instructions:
 
     if (questionLower.includes('leak') || questionLower.includes('memory') || questionLower.includes('socket')) {
       return {
-        answer: `**Summary**\nA potential memory leak was identified in buffer allocation blocks.\n\n**Reasoning**\nCommit 02dd778 cleaned up heavy cache indexes that were holding transient module allocations in node_modules directories.\n\n**Suggested Fix**\nEnsure all socket connections are explicitly closed in the finally block and run a heap snapshot analysis before and after connection teardown.`,
+        answer: `**Summary**:\nA potential memory leak was identified in buffer allocation blocks.\n\n**Reasoning**:\nCommit 02dd778 cleaned up heavy cache indexes that were holding transient module allocations in node_modules directories.\n\n**Suggested Fix**:\nEnsure all socket connections are explicitly closed in the finally block and run a heap snapshot analysis before and after connection teardown.`,
         confidence: 0.85,
         evidence: [
           {
@@ -121,7 +121,7 @@ Instructions:
 
     if (questionLower.includes('package') || questionLower.includes('depend')) {
       return {
-        answer: `**Summary**\nThe package.json was modified in 2 commits.\n\n**Reasoning**\nThe initial commit established the project dependencies. A subsequent commit added .gitignore to properly track only source files.\n\n**Suggested Fix**\nReview package-lock.json for any version mismatches and run \`pnpm audit\` to check for vulnerabilities.`,
+        answer: `**Summary**:\nThe package.json was modified in 2 commits.\n\n**Reasoning**:\nThe initial commit established the project dependencies. A subsequent commit added .gitignore to properly track only source files.\n\n**Suggested Fix**:\nReview package-lock.json for any version mismatches and run \`pnpm audit\` to check for vulnerabilities.`,
         confidence: 0.90,
         evidence: [
           {
@@ -135,7 +135,7 @@ Instructions:
     }
 
     return {
-      answer: `**Summary**\nThis is a TraceMind AI mock response for: "${question}".\n\n**Reasoning**\nNo GEMINI_API_KEY is configured, so the system is running in offline mock mode.\n\n**Suggested Fix**\nSet GEMINI_API_KEY in apps/api/.env with a valid Google AI Studio key to enable real AI analysis.`,
+      answer: `**Summary**:\nThis is a TraceMind AI mock response for: "${question}".\n\n**Reasoning**:\nNo GEMINI_API_KEY is configured, so the system is running in offline mock mode.\n\n**Suggested Fix**:\nSet GEMINI_API_KEY in apps/api/.env with a valid Google AI Studio key to enable real AI analysis.`,
       confidence: 0.5,
       evidence: [
         {
