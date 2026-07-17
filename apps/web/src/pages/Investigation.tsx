@@ -152,6 +152,20 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
   );
 }
 
+const renderMarkdown = (text: string) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={index} className="font-bold text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+};
+
 export default function Investigation() {
   const [query, setQuery] = useState('');
   const [, setSearchParams] = useSearchParams();
@@ -376,7 +390,7 @@ export default function Investigation() {
                   : 'bg-[#0c0d14] text-gray-300 border border-[#1e2030]'
                 }`}
               >
-                {msg.text}
+                {renderMarkdown(msg.text)}
               </div>
 
               {/* Confidence Badge & Evidence Rendering for Assistant responses */}
