@@ -90,3 +90,17 @@ We use [Vitest](https://vitest.dev/) to run automated tests. Run backend route a
 ```bash
 pnpm --filter @tracemind/api test
 ```
+
+---
+
+## Running the Demo Investigation
+
+To instantly explore TraceMind's features:
+1. Ensure both dev servers are running (`pnpm dev`).
+2. Open **[http://localhost:5173/repositories](http://localhost:5173/repositories)** in your web browser.
+3. Under **Import Local Directory**, enter the absolute path of this repository:
+   `/Users/nayemuddinshaikh/Desktop/Coding/Ai/TraceSpark`
+4. Click **Import Repository**. It will index and list it under the Active Workspace.
+5. Navigate to the **[AI Investigation](http://localhost:5173/investigate)** page.
+6. Click one of the suggested prompts (e.g. *"Explain the changes in the latest commits."*) or ask a custom question. The Gemini-powered RAG pipeline will scan the commit logs, rank relevance, and output a structured answer alongside interactive evidence cards.
+
