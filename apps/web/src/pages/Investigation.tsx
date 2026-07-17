@@ -29,12 +29,12 @@ interface ChatMessage {
 function RAGTerminalLoader() {
   const [lines, setLines] = useState<string[]>([]);
   const steps = [
-    '→ Extracting search keywords...',
-    '⚡ Scanning local git repository commits log...',
-    '🔍 Scoring 30 commits against query keywords...',
-    '📂 Bundling evidence: compiling diff patches for top matches...',
-    '🔧 Assembling optimized RAG context blocks...',
-    '🤖 Querying Gemini AI Engine (gemini-2.5-flash)...'
+    '[INFO] Extracting search query keywords...',
+    '[INFO] Retrieving local commit logs from GitEngine...',
+    '[INFO] Calculating relevance scores across 30 candidate commits...',
+    '[INFO] Extracting changed files and unified patch diffs...',
+    '[INFO] Compiling optimal context prompt (max 100 diff lines)...',
+    '[INFO] Initializing live AI model (gemini-2.5-flash)...'
   ];
 
   useEffect(() => {
@@ -53,17 +53,17 @@ function RAGTerminalLoader() {
   }, []);
 
   return (
-    <div className="bg-[#07080c] border border-purple-500/20 p-4 rounded-lg font-mono text-[10px] space-y-1.5 w-full max-w-md shadow-xl shadow-purple-500/5 animate-fadeIn">
+    <div className="bg-[#07080c] border border-[#1e2030] p-4 rounded-lg font-mono text-[10px] space-y-1.5 w-full max-w-md shadow-xl animate-fadeIn">
       <div className="flex items-center justify-between text-gray-500 border-b border-[#1e2030]/60 pb-2 mb-2">
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping" />
-          <span>Active RAG Forensics Scan</span>
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
+          <span>RAG Pipeline Scan</span>
         </span>
         <span>TRACEMIND // LOG</span>
       </div>
       <div className="space-y-1">
         {lines.map((line, i) => (
-          <div key={i} className="text-purple-300 animate-fadeIn">
+          <div key={i} className="text-purple-400/90 animate-fadeIn">
             {line}
           </div>
         ))}
@@ -404,7 +404,7 @@ export default function Investigation() {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-purple-400" />
-            <span>AI Forensic Lab</span>
+            <span>AI Investigator</span>
           </h2>
           <p className="text-xs text-[#626875]">Run natural language queries to investigate root causes of bugs.</p>
         </div>
@@ -435,7 +435,7 @@ export default function Investigation() {
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-          <span>AI Forensic Lab</span>
+          <span>AI Investigator</span>
         </h2>
         <p className="text-xs text-[#626875]">
           Analyze active repository <span className="text-gray-300 font-mono font-medium">{activeRepo.name}</span>.
@@ -481,7 +481,7 @@ export default function Investigation() {
                   {/* Evidence blocks list */}
                   {msg.evidence && msg.evidence.length > 0 && (
                     <div className="space-y-1.5">
-                      <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Crime Scene Evidence</div>
+                      <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Evidence Collected</div>
                       <div className="space-y-1.5">
                         {msg.evidence.map((item, idx) => (
                           <EvidenceCard key={idx} item={item} setSearchParams={setSearchParams} />
@@ -511,7 +511,7 @@ export default function Investigation() {
       {/* Suggested Prompts Block */}
       {messages.length === 1 && !chatMutation.isPending && (
         <div className="space-y-1.5 animate-slideUp">
-          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Suggested Cases</div>
+          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Suggested Investigations</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {suggestedPrompts.map((prompt) => (
               <button
