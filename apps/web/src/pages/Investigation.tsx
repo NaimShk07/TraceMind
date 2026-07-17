@@ -11,7 +11,6 @@ import {
   AlertCircle, 
   ArrowRight,
   GitCommit,
-  ShieldCheck,
   ExternalLink,
   ChevronDown,
   ChevronUp,
@@ -25,6 +24,84 @@ interface ChatMessage {
   text: string;
   confidence?: number;
   evidence?: EvidenceItem[];
+}
+
+function RAGTerminalLoader() {
+  const [lines, setLines] = useState<string[]>([]);
+  const steps = [
+    '→ Extracting search keywords...',
+    '⚡ Scanning local git repository commits log...',
+    '🔍 Scoring 30 commits against query keywords...',
+    '📂 Bundling evidence: compiling diff patches for top matches...',
+    '🔧 Assembling optimized RAG context blocks...',
+    '🤖 Querying Gemini AI Engine (gemini-2.5-flash)...'
+  ];
+
+  useEffect(() => {
+    let index = 0;
+    setLines([steps[0]]);
+    const interval = setInterval(() => {
+      index++;
+      if (index < steps.length) {
+        setLines(prev => [...prev, steps[index]]);
+      } else {
+        clearInterval(interval);
+      }
+    }, 700);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="bg-[#07080c] border border-purple-500/20 p-4 rounded-lg font-mono text-[10px] space-y-1.5 w-full max-w-md shadow-xl shadow-purple-500/5 animate-fadeIn">
+      <div className="flex items-center justify-between text-gray-500 border-b border-[#1e2030]/60 pb-2 mb-2">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping" />
+          <span>Active RAG Forensics Scan</span>
+        </span>
+        <span>TRACEMIND // LOG</span>
+      </div>
+      <div className="space-y-1">
+        {lines.map((line, i) => (
+          <div key={i} className="text-purple-300 animate-fadeIn">
+            {line}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ConfidenceGauge({ value }: { value: number }) {
+  const percentage = Math.round(value * 100);
+  const radius = 10;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="flex items-center gap-2 text-emerald-400 font-semibold font-mono">
+      <svg className="w-6 h-6 transform -rotate-90 shrink-0">
+        <circle
+          cx="12"
+          cy="12"
+          r={radius}
+          className="stroke-[#1e2030] fill-none"
+          strokeWidth="2.5"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r={radius}
+          className="stroke-emerald-400 fill-none transition-all duration-1000 ease-out"
+          strokeWidth="2.5"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span>{percentage}% Confidence Score</span>
+    </div>
+  );
 }
 
 function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearchParams: any }) {
@@ -327,7 +404,7 @@ export default function Investigation() {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-purple-400" />
-            <span>AI Investigator</span>
+            <span>AI Forensic Lab</span>
           </h2>
           <p className="text-xs text-[#626875]">Run natural language queries to investigate root causes of bugs.</p>
         </div>
@@ -358,7 +435,7 @@ export default function Investigation() {
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-          <span>AI Investigator</span>
+          <span>AI Forensic Lab</span>
         </h2>
         <p className="text-xs text-[#626875]">
           Analyze active repository <span className="text-gray-300 font-mono font-medium">{activeRepo.name}</span>.
@@ -398,16 +475,13 @@ export default function Investigation() {
                 <div className="p-3 bg-[#090a0f] rounded-lg border border-[#1e2030] text-[10px] space-y-2.5 animate-slideUp">
                   {/* Confidence meter */}
                   {msg.confidence !== undefined && (
-                    <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>{Math.round(msg.confidence * 100)}% Confidence Score</span>
-                    </div>
+                    <ConfidenceGauge value={msg.confidence} />
                   )}
 
                   {/* Evidence blocks list */}
                   {msg.evidence && msg.evidence.length > 0 && (
                     <div className="space-y-1.5">
-                      <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Evidence Collected</div>
+                      <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Crime Scene Evidence</div>
                       <div className="space-y-1.5">
                         {msg.evidence.map((item, idx) => (
                           <EvidenceCard key={idx} item={item} setSearchParams={setSearchParams} />
@@ -425,11 +499,9 @@ export default function Investigation() {
         {chatMutation.isPending && (
           <div className="flex gap-3 max-w-3xl animate-fadeIn">
             <div className="w-7 h-7 rounded-md flex items-center justify-center bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 shrink-0">
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Terminal className="w-4 h-4" />
             </div>
-            <div className="bg-[#0c0d14] text-gray-400 border border-[#1e2030] text-[10px] py-2 px-3 rounded-lg flex items-center gap-1.5">
-              <span>TraceMind is analyzing codebase...</span>
-            </div>
+            <RAGTerminalLoader />
           </div>
         )}
 
@@ -439,7 +511,7 @@ export default function Investigation() {
       {/* Suggested Prompts Block */}
       {messages.length === 1 && !chatMutation.isPending && (
         <div className="space-y-1.5 animate-slideUp">
-          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Suggested Investigations</div>
+          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Suggested Cases</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {suggestedPrompts.map((prompt) => (
               <button
