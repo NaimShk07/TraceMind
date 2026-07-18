@@ -78,6 +78,17 @@ Instructions:
       return this.cleanAndParseJson(text);
     } catch (err: any) {
       logger.error('AI Request failed', err);
+
+      // Surface rate-limit errors with a user-friendly message instead of a generic 500
+      const status = err?.status ?? err?.response?.status;
+      if (status === 429) {
+        const retryMatch = err?.message?.match(/retry in ([\d.]+)s/i);
+        const retrySeconds = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : 60;
+        throw new InternalServerError(
+          `AI is currently rate-limited. The free-tier quota is exhausted. Please try again in ${retrySeconds} seconds, or upgrade your Google AI Studio API key.`
+        );
+      }
+
       throw new InternalServerError(`AI Analysis failed: ${err.message}`);
     }
   }
