@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Folder, HardDrive, Loader2, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Folder, HardDrive, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import type { RepositoryDetails } from '@tracemind/shared';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export default function Repositories() {
   const [repoPath, setRepoPath] = useState('');
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // 1. Fetch active repository details
   const { data: activeRepoResponse, isLoading } = useQuery<{
@@ -45,6 +47,7 @@ export default function Repositories() {
       setRepoPath('');
       // Invalidate activeRepository query to update list immediately
       queryClient.invalidateQueries({ queryKey: ['activeRepository'] });
+      navigate('/');
     },
   });
 
@@ -52,6 +55,11 @@ export default function Repositories() {
     e.preventDefault();
     if (!repoPath.trim() || importMutation.isPending) return;
     importMutation.mutate(repoPath.trim());
+  };
+
+  const handleImportDemo = () => {
+    if (importMutation.isPending) return;
+    importMutation.mutate('../../demo-repo');
   };
 
   return (
@@ -103,6 +111,25 @@ export default function Repositories() {
             )}
           </button>
         </form>
+      </div>
+
+      {/* Demo Repository Quick-start Card */}
+      <div className="p-5 bg-purple-950/10 border border-purple-500/20 rounded-lg max-w-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h4 className="text-xs font-semibold text-white">No local repository ready?</h4>
+          <p className="text-[10px] text-purple-200/70 max-w-sm mt-0.5 leading-relaxed">
+            Explore TraceMind instantly using our pre-seeded authentication service repository with active database connection leaks.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleImportDemo}
+          disabled={importMutation.isPending}
+          className="px-4 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md cursor-pointer transition-colors active:scale-95 disabled:opacity-50 shrink-0 flex items-center justify-center gap-1.5"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Try Demo Repository</span>
+        </button>
       </div>
 
       {/* List of active repositories */}
