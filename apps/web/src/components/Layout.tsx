@@ -199,10 +199,13 @@ export default function Layout() {
               </span>
             </div>
           </div>
-          <a href="#" className="flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md text-gray-400 hover:text-white hover:bg-[#161722]/50 transition-colors">
+          <button 
+            onClick={() => setInspectorOpen(prev => !prev)}
+            className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md text-gray-400 hover:text-white hover:bg-[#161722]/50 transition-colors cursor-pointer text-left"
+          >
             <Settings className="w-4 h-4" />
-            <span>Settings</span>
-          </a>
+            <span>Inspector Telemetry</span>
+          </button>
         </div>
       </aside>
 
@@ -256,7 +259,7 @@ export default function Layout() {
           {/* 3. Right Inspector Panel */}
           <aside className={`
             border-l border-[#1e2030] bg-[#0c0d14] flex flex-col shrink-0 overflow-y-auto transition-all duration-200
-            ${inspectorOpen ? (commit ? 'w-[450px] p-6 opacity-100' : 'w-80 p-6 opacity-100') : 'w-0 p-0 opacity-0 border-l-0'}
+            ${inspectorOpen ? 'w-[400px] p-6 opacity-100' : 'w-0 p-0 opacity-0 border-l-0'}
             hidden md:flex
           `}>
             {commitHash ? (

@@ -91,7 +91,7 @@ export default function Repositories() {
           <button 
             type="submit" 
             disabled={!repoPath.trim() || importMutation.isPending}
-            className="w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs py-2 rounded-md transition-colors cursor-pointer disabled:bg-[#1e2030] disabled:text-gray-500 flex items-center justify-center gap-2"
+            className="w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs py-2 rounded-md transition-colors cursor-pointer disabled:cursor-not-allowed disabled:bg-[#1e2030] disabled:text-gray-500 flex items-center justify-center gap-2"
           >
             {importMutation.isPending ? (
               <>

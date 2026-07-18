@@ -237,7 +237,7 @@ export default function Dashboard() {
                       
                       <button
                         onClick={() => navigate(`/timeline?commit=${commit.hash}`)}
-                        className="w-full text-left space-y-1 block cursor-pointer"
+                        className="w-full text-left space-y-1 block cursor-pointer hover:bg-[#161722]/50 p-2 -mx-2 rounded transition-all"
                       >
                         <div className="flex items-center justify-between text-[9px] font-mono text-gray-500">
                           <span className="text-purple-400 font-bold group-hover:underline">
