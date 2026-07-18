@@ -291,6 +291,106 @@ const renderMarkdown = (text: string) => {
   });
 };
 
+const parseReport = (text: string) => {
+  const summaryRegex = /(?:[0-9]*\.\s*)?\*\*(?:Summary|Executive Summary)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause|Suggested Fix|Recommended Fix)\*\*|$)/i;
+  const rootCauseRegex = /(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Suggested Fix|Recommended Fix)\*\*|$)/i;
+  const fixRegex = /(?:[0-9]*\.\s*)?\*\*(?:Suggested Fix|Recommended Fix)\*\*:\s*([\s\S]*)$/i;
+
+  const summaryMatch = text.match(summaryRegex);
+  const rootCauseMatch = text.match(rootCauseRegex);
+  const fixMatch = text.match(fixRegex);
+
+  return {
+    summary: summaryMatch ? summaryMatch[1].trim() : '',
+    rootCause: rootCauseMatch ? rootCauseMatch[1].trim() : '',
+    recommendedFix: fixMatch ? fixMatch[1].trim() : '',
+  };
+};
+
+interface InvestigationReportProps {
+  text: string;
+  confidence?: number;
+  evidence?: EvidenceItem[];
+  setSearchParams: any;
+}
+
+function InvestigationReport({ text, confidence, evidence = [], setSearchParams }: InvestigationReportProps) {
+  const parsed = parseReport(text);
+  const hasParsedSections = parsed.summary || parsed.rootCause || parsed.recommendedFix;
+
+  return (
+    <div className="bg-[#0c0d14] text-gray-300 border border-[#1e2030] rounded-xl overflow-hidden shadow-2xl space-y-4 p-5 w-full max-w-2xl min-w-0 animate-fadeIn">
+      {/* Report Header */}
+      <div className="flex items-center justify-between border-b border-[#1e2030]/60 pb-3">
+        <div className="flex items-center gap-2">
+          <div className="p-1 bg-purple-500/10 rounded border border-purple-500/20 text-purple-400">
+            <Terminal className="w-4 h-4" />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-white tracking-wider uppercase font-mono">Investigation Report</h4>
+            <span className="inline-flex items-center gap-1 text-[8px] bg-purple-950/30 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-mono font-medium animate-pulse">
+              STATUS: DIAGNOSED
+            </span>
+          </div>
+        </div>
+        {confidence !== undefined && (
+          <ConfidenceGauge value={confidence} />
+        )}
+      </div>
+
+      {!hasParsedSections ? (
+        <div className="text-xs leading-relaxed whitespace-pre-wrap select-text">
+          {renderMarkdown(text)}
+        </div>
+      ) : (
+        <div className="space-y-4 text-xs leading-relaxed">
+          {/* Summary */}
+          {parsed.summary && (
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Summary</span>
+              <div className="bg-[#07080c] border border-[#1e2030] p-3 rounded-lg text-gray-300 select-text">
+                {renderMarkdown(parsed.summary)}
+              </div>
+            </div>
+          )}
+
+          {/* Root Cause */}
+          {parsed.rootCause && (
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-mono tracking-widest text-purple-400 uppercase font-bold">Root Cause</span>
+              <div className="pl-3 border-l-2 border-purple-500/40 select-text space-y-1">
+                {renderMarkdown(parsed.rootCause)}
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Fix */}
+          {parsed.recommendedFix && (
+            <div className="space-y-1.5">
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Recommended Fix</span>
+              <div className="bg-[#07080c] border border-[#1e2030] p-3 rounded-lg font-mono text-[10px] overflow-x-auto text-gray-300 select-text whitespace-pre-wrap">
+                {renderMarkdown(parsed.recommendedFix)}
+              </div>
+            </div>
+          )}
+
+          {/* Evidence Timeline */}
+          {evidence.length > 0 && (
+            <div className="space-y-3 border-t border-[#1e2030]/60 pt-3">
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Evidence & Commit Timeline</span>
+              <div className="space-y-2">
+                {evidence.map((item, idx) => (
+                  <EvidenceCard key={idx} item={item} setSearchParams={setSearchParams} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Investigation() {
   const [query, setQuery] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
@@ -522,34 +622,23 @@ export default function Investigation() {
 
             {/* Bubble */}
             <div className="space-y-2 max-w-2xl min-w-0">
-              <div className={`text-xs p-3 rounded-lg leading-relaxed whitespace-pre-wrap select-text
-                ${msg.sender === 'user' 
-                  ? 'bg-purple-600/10 text-purple-100 border border-purple-500/20' 
-                  : 'bg-[#0c0d14] text-gray-300 border border-[#1e2030]'
-                }`}
-              >
-                {renderMarkdown(msg.text)}
-              </div>
-
-              {/* Confidence Badge & Evidence Rendering for Assistant responses */}
-              {msg.sender === 'assistant' && (msg.confidence !== undefined || (msg.evidence && msg.evidence.length > 0)) && (
-                <div className="p-3 bg-[#090a0f] rounded-lg border border-[#1e2030] text-[10px] space-y-2.5 animate-slideUp">
-                  {/* Confidence meter */}
-                  {msg.confidence !== undefined && (
-                    <ConfidenceGauge value={msg.confidence} />
-                  )}
-
-                  {/* Evidence blocks list */}
-                  {msg.evidence && msg.evidence.length > 0 && (
-                    <div className="space-y-1.5">
-                      <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Evidence Collected</div>
-                      <div className="space-y-1.5">
-                        {msg.evidence.map((item, idx) => (
-                          <EvidenceCard key={idx} item={item} setSearchParams={setSearchParams} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              {msg.sender === 'user' ? (
+                /* User Bubble */
+                <div className="text-xs p-3 rounded-lg leading-relaxed whitespace-pre-wrap select-text bg-purple-600/10 text-purple-100 border border-purple-500/20">
+                  {renderMarkdown(msg.text)}
+                </div>
+              ) : msg.confidence !== undefined || (msg.evidence && msg.evidence.length > 0) ? (
+                /* Assistant Structured Investigation Report */
+                <InvestigationReport
+                  text={msg.text}
+                  confidence={msg.confidence}
+                  evidence={msg.evidence}
+                  setSearchParams={setSearchParams}
+                />
+              ) : (
+                /* Assistant Standard Bubble (e.g. initial greeting) */
+                <div className="text-xs p-3 rounded-lg leading-relaxed whitespace-pre-wrap select-text bg-[#0c0d14] text-gray-300 border border-[#1e2030]">
+                  {renderMarkdown(msg.text)}
                 </div>
               )}
             </div>
