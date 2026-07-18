@@ -59,7 +59,7 @@ export default function Repositories() {
 
   const handleImportDemo = () => {
     if (importMutation.isPending) return;
-    importMutation.mutate('../../demo-repo');
+    importMutation.mutate('demo-repo');
   };
 
   return (
