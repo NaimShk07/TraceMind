@@ -44,10 +44,22 @@ const highlightText = (text: string, query: string) => {
   );
 };
 
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 export default function Timeline() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCommitHash = searchParams.get('commit');
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 250);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard Shortcuts: Press / or Cmd+K to focus search input
@@ -96,10 +108,10 @@ export default function Timeline() {
     isLoading: isCommitsLoading,
     isError: isCommitsError,
   } = useInfiniteQuery({
-    queryKey: ['commits', activeRepo?.repositoryId, search],
+    queryKey: ['commits', activeRepo?.repositoryId, debouncedSearch],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await fetch(
-        `http://localhost:3001/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(search)}`
+        `http://localhost:3001/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(debouncedSearch)}`
       );
       if (!res.ok) throw new Error('Failed to fetch commits');
       return res.json() as Promise<{ success: boolean; data: CommitMetadata[] }>;

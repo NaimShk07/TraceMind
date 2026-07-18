@@ -273,7 +273,11 @@ export default function Layout() {
                     </h2>
                   </div>
                   <button 
-                    onClick={() => setSearchParams({})}
+                    onClick={() => {
+                      const params = new URLSearchParams(searchParams);
+                      params.delete('commit');
+                      setSearchParams(params);
+                    }}
                     className="text-gray-500 hover:text-white p-1 rounded hover:bg-[#161722] cursor-pointer transition-colors"
                     title="Close Details"
                   >
