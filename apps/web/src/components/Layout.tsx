@@ -408,7 +408,7 @@ export default function Layout() {
                   <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Env:</span>
-                      <span className="text-white">development</span>
+                      <span className="text-white capitalize">{import.meta.env.MODE}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Storage:</span>
