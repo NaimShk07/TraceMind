@@ -23,19 +23,17 @@ export class AiService {
     }
 
     try {
-      const model = this.genAI!.getGenerativeModel(
-        {
-          model: 'gemini-1.5-flash-latest',
-          generationConfig: {
-            temperature: 0.3,
-          },
-          safetySettings: [
-            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
-          ],
+      const model = this.genAI!.getGenerativeModel({
+        model: 'gemini-2.0-flash',
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.3,
         },
-        { apiVersion: 'v1' }
-      );
+        safetySettings: [
+          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ],
+      });
 
       const systemPrompt = `You are TraceMind, an expert AI agent specializing in Git repository analysis and debugging.
 Your goal is to answer the user's question about the repository based on the provided context.
