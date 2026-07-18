@@ -27,4 +27,5 @@ build/
 .env.production.local
 
 .ai
+ai
 DEMO.md
