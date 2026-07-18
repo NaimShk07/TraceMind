@@ -27,7 +27,6 @@ export class AiService {
         {
           model: 'gemini-1.5-flash-latest',
           generationConfig: {
-            responseMimeType: 'application/json',
             temperature: 0.3,
           },
           safetySettings: [
