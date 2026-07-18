@@ -196,8 +196,11 @@ export default function Layout() {
             <span className="text-gray-500">API Gateway</span>
             <div className="flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isError ? 'bg-red-500' : data?.success ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span className={isError ? 'text-red-400' : data?.success ? 'text-emerald-400' : 'text-amber-400'}>
-                {isError ? 'Offline' : data?.success ? 'Connected' : 'Connecting'}
+              <span 
+                className={isError ? 'text-red-400 cursor-help' : data?.success ? 'text-emerald-400' : 'text-amber-400'}
+                title={isError ? 'API offline. If using a cloud API URL containing "trace" (like tracemind), please disable your ad-blocker on this page.' : undefined}
+              >
+                {isError ? 'Offline ⓘ' : data?.success ? 'Connected' : 'Connecting'}
               </span>
             </div>
           </div>
@@ -235,9 +238,12 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             {/* Health Monitor Label */}
             {isError && (
-              <div className="flex items-center gap-1.5 text-[10px] font-mono text-red-400 bg-red-950/20 border border-red-900/30 px-2 py-1 rounded">
+              <div 
+                className="flex items-center gap-1.5 text-[10px] font-mono text-red-400 bg-red-950/20 border border-red-900/30 px-2 py-1 rounded cursor-help"
+                title="API is unreachable. If online, check if your ad-blocker is blocking domain names containing the word 'trace' (e.g. tracemind)."
+              >
                 <AlertCircle className="w-3 h-3" />
-                <span>API Offline</span>
+                <span>API Offline (Ad-blocker?)</span>
               </div>
             )}
             
