@@ -6,7 +6,8 @@
     "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "setup-demo": "npx tsx scripts/setup-demo-repo.ts"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
