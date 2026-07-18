@@ -15,9 +15,11 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  User as UserIcon
+  User as UserIcon,
+  Check
 } from 'lucide-react';
 import type { RepositoryDetails, ChatResponse, EvidenceItem, CommitDetails } from '@tracemind/shared';
+import { motion } from 'framer-motion';
 
 interface ChatMessage {
   sender: 'user' | 'assistant';
@@ -27,46 +29,92 @@ interface ChatMessage {
 }
 
 function RAGTerminalLoader() {
-  const [lines, setLines] = useState<string[]>([]);
+  const [activeStep, setActiveStep] = useState(0);
+
   const steps = [
-    '[INFO] Extracting search query keywords...',
-    '[INFO] Retrieving local commit logs from GitEngine...',
-    '[INFO] Calculating relevance scores across 30 candidate commits...',
-    '[INFO] Extracting changed files and unified patch diffs...',
-    '[INFO] Compiling optimal context prompt (max 100 diff lines)...',
-    '[INFO] Initializing live AI model (gemini-2.5-flash)...'
+    'Extracting search query keywords',
+    'Retrieving local commit logs from GitEngine',
+    'Calculating relevance scores across candidate commits',
+    'Extracting changed files and unified patch diffs',
+    'Assembling RAG context and querying Gemini model'
   ];
 
   useEffect(() => {
-    let index = 0;
-    setLines([steps[0]]);
-    const interval = setInterval(() => {
-      index++;
-      if (index < steps.length) {
-        setLines(prev => [...prev, steps[index]]);
-      } else {
-        clearInterval(interval);
+    const intervals = [600, 700, 800, 700, 900];
+    let current = 0;
+    
+    const runNext = () => {
+      if (current < steps.length - 1) {
+        setTimeout(() => {
+          current++;
+          setActiveStep(current);
+          runNext();
+        }, intervals[current]);
       }
-    }, 700);
+    };
 
-    return () => clearInterval(interval);
+    runNext();
   }, []);
 
   return (
-    <div className="bg-[#07080c] border border-[#1e2030] p-4 rounded-lg font-mono text-[10px] space-y-1.5 w-full max-w-md shadow-xl animate-fadeIn">
+    <div className="bg-[#07080c] border border-[#1e2030] p-4 rounded-lg font-mono text-[10px] space-y-3.5 w-full max-w-md shadow-2xl animate-fadeIn">
       <div className="flex items-center justify-between text-gray-500 border-b border-[#1e2030]/60 pb-2 mb-2">
-        <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
-          <span>RAG Pipeline Scan</span>
+        <span className="flex items-center gap-1.5 font-semibold">
+          <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+          <span className="text-[10px] text-gray-400">RAG Telemetry Scan</span>
         </span>
-        <span>TRACEMIND // LOG</span>
+        <span className="text-[9px]">TRACEMIND // LOG</span>
       </div>
-      <div className="space-y-1">
-        {lines.map((line, i) => (
-          <div key={i} className="text-purple-400/90 animate-fadeIn">
-            {line}
-          </div>
-        ))}
+
+      <div className="space-y-2.5">
+        {steps.map((label, index) => {
+          const isCompleted = index < activeStep;
+          const isActive = index === activeStep;
+          const isPending = index > activeStep;
+
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -5 }}
+              animate={{ 
+                opacity: isPending ? 0.35 : 1, 
+                x: 0,
+              }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center gap-3"
+            >
+              {/* Icon Container */}
+              <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                {isCompleted && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <Check className="w-3.5 h-3.5 text-emerald-400 font-bold" strokeWidth={3} />
+                  </motion.div>
+                )}
+                {isActive && (
+                  <div className="w-2.5 h-2.5 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+                )}
+                {isPending && (
+                  <div className="w-1 h-1 rounded-full bg-gray-700" />
+                )}
+              </div>
+
+              {/* Step Label */}
+              <span className={`transition-colors duration-300 ${
+                isCompleted 
+                  ? 'text-gray-400 font-medium' 
+                  : isActive 
+                    ? 'text-purple-300 font-semibold' 
+                    : 'text-gray-600'
+              }`}>
+                {isCompleted ? `[OK] ${label}` : isActive ? `[RUN] ${label}...` : `[PEND] ${label}`}
+              </span>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
