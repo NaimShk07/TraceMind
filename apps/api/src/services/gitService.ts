@@ -31,7 +31,7 @@ export class GitService {
    */
   private getGitInstance(repoPath: string): SimpleGit {
     const resolvedPath = this.resolveRepoPath(repoPath);
-    
+
     if (!fs.existsSync(resolvedPath)) {
       throw new NotFoundError(`Directory "${repoPath}" does not exist`);
     }
@@ -49,11 +49,15 @@ export class GitService {
    */
   public async getRepositoryInfo(repoPath: string): Promise<{ name: string; branch: string }> {
     const git = this.getGitInstance(repoPath);
+    const name = path.basename(path.resolve(repoPath));
     try {
       const branch = await git.revparse(['--abbrev-ref', 'HEAD']);
-      const name = path.basename(path.resolve(repoPath));
       return { name: branch.trim() ? name : 'unknown', branch: branch.trim() || 'main' };
     } catch (err: any) {
+      // Fallback for newly initialized repositories with no commits
+      if (err.message.includes('needed a single revision') || err.message.includes('HEAD')) {
+        return { name, branch: 'main' };
+      }
       throw new BadRequestError(`Failed to read repository info: ${err.message}`);
     }
   }
@@ -76,7 +80,7 @@ export class GitService {
    */
   public async getCommitHistory(
     repoPath: string,
-    options: { page?: number; limit?: number; search?: string } = {}
+    options: { page?: number; limit?: number; search?: string } = {},
   ): Promise<CommitMetadata[]> {
     const git = this.getGitInstance(repoPath);
     const page = options.page || 1;
@@ -107,7 +111,7 @@ export class GitService {
               filesChangedCount: filesChanged.length,
               filesChanged,
             };
-          })
+          }),
         );
 
         const searchLower = search.toLowerCase();
@@ -116,7 +120,7 @@ export class GitService {
           const matchAuthor = commit.author.toLowerCase().includes(searchLower);
           const matchHash = commit.hash.toLowerCase().includes(searchLower);
           const matchFiles = commit.filesChanged.some((file) =>
-            file.toLowerCase().includes(searchLower)
+            file.toLowerCase().includes(searchLower),
           );
           return matchMsg || matchAuthor || matchHash || matchFiles;
         });
@@ -126,10 +130,7 @@ export class GitService {
         // Exclude full filesChanged array from output metadata object
         return sliced.map(({ filesChanged, ...rest }) => rest);
       } else {
-        const logResult = await git.log([
-          `--max-count=${limit}`,
-          `--skip=${skip}`,
-        ]);
+        const logResult = await git.log([`--max-count=${limit}`, `--skip=${skip}`]);
 
         const commits = await Promise.all(
           logResult.all.map(async (commit) => {
@@ -148,7 +149,7 @@ export class GitService {
               message: commit.message,
               filesChangedCount,
             };
-          })
+          }),
         );
 
         return commits;
@@ -180,7 +181,7 @@ export class GitService {
 
       // Fetch shortstats for additions/deletions parsing
       const statsRaw = await git.show(['--shortstat', '--pretty=format:', hash]);
-      
+
       let additions = 0;
       let deletions = 0;
 
@@ -201,14 +202,16 @@ export class GitService {
         stats: {
           additions,
           deletions,
-          filesChanged: filesChanged.length
-        }
+          filesChanged: filesChanged.length,
+        },
       };
     } catch (err: any) {
       if (err instanceof NotFoundError || err instanceof BadRequestError) {
         throw err;
       }
-      throw new BadRequestError(`Failed to fetch commit details for hash "${hash}": ${err.message}`);
+      throw new BadRequestError(
+        `Failed to fetch commit details for hash "${hash}": ${err.message}`,
+      );
     }
   }
 
@@ -250,7 +253,7 @@ export class GitService {
             message: commit.message,
             filesChangedCount,
           };
-        })
+        }),
       );
 
       return commits;

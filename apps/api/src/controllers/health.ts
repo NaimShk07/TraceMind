@@ -1,11 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import type { HealthResponse } from '@tracemind/shared';
 
-export const getHealth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getHealth = (req: Request, res: Response, next: NextFunction) => {
   try {
     const responseData: HealthResponse = {
       status: 'ok',

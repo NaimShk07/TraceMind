@@ -8,7 +8,7 @@ export const errorHandler = (
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction
+  next: NextFunction,
 ) => {
   let statusCode = 500;
   let code = 'INTERNAL_SERVER_ERROR';
@@ -28,10 +28,10 @@ export const errorHandler = (
     logger.warn(`API Error [${code}]: ${message}`, { statusCode });
   } else {
     // Log unexpected server errors
-    logger.error(`Unhandled Exception: ${err.message}`, { 
+    logger.error(`Unhandled Exception: ${err.message}`, {
       stack: err.stack,
       url: req.originalUrl,
-      method: req.method
+      method: req.method,
     });
   }
 

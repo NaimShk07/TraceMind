@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { 
-  Calendar, 
-  User, 
-  Code, 
-  GitCommit, 
-  Activity, 
+import {
+  Calendar,
+  User,
+  Code,
+  GitCommit,
+  Activity,
   AlertCircle,
   ArrowRight,
   Database,
   Search,
-  X
+  X,
 } from 'lucide-react';
 import type { CommitMetadata, RepositoryDetails } from '@tracemind/shared';
 
@@ -40,7 +40,7 @@ const highlightText = (text: string, query: string) => {
           </mark>
         ) : (
           part
-        )
+        ),
       )}
     </span>
   );
@@ -69,7 +69,7 @@ export default function Timeline() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if typing inside input or textarea
       if (
-        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
         document.activeElement?.tagName === 'SELECT'
       ) {
@@ -87,7 +87,11 @@ export default function Timeline() {
   }, []);
 
   // 1. Fetch active repository details
-  const { data: activeRepoData, isLoading: isRepoLoading, isError: isRepoError } = useQuery<{
+  const {
+    data: activeRepoData,
+    isLoading: isRepoLoading,
+    isError: isRepoError,
+  } = useQuery<{
     success: boolean;
     data: RepositoryDetails | null;
   }>({
@@ -113,7 +117,7 @@ export default function Timeline() {
     queryKey: ['commits', activeRepo?.repositoryId, debouncedSearch],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await fetch(
-        `${API_BASE}/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(debouncedSearch)}`
+        `${API_BASE}/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(debouncedSearch)}`,
       );
       if (!res.ok) throw new Error('Failed to fetch commits');
       return res.json() as Promise<{ success: boolean; data: CommitMetadata[] }>;
@@ -150,7 +154,8 @@ export default function Timeline() {
         <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
         <h3 className="text-sm font-semibold text-white">Connection Failure</h3>
         <p className="text-xs text-red-300">
-          Failed to establish a connection to the backend REST API. Make sure the server is online at <code>localhost:3001</code>.
+          Failed to establish a connection to the backend REST API. Make sure the server is online
+          at <code>localhost:3001</code>.
         </p>
       </div>
     );
@@ -170,7 +175,8 @@ export default function Timeline() {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-white">No repository selected</h3>
             <p className="text-xs text-gray-400 max-w-sm mx-auto leading-relaxed">
-              In order to generate and explore the commit timeline, you must first import a local Git repository.
+              In order to generate and explore the commit timeline, you must first import a local
+              Git repository.
             </p>
           </div>
           <Link
@@ -192,7 +198,9 @@ export default function Timeline() {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Timeline</h2>
           <p className="text-xs text-[#626875]">
-            Chronological commit stream for <span className="text-gray-300 font-medium font-mono">{activeRepo.name}</span> ({activeRepo.branch}).
+            Chronological commit stream for{' '}
+            <span className="text-gray-300 font-medium font-mono">{activeRepo.name}</span> (
+            {activeRepo.branch}).
           </p>
         </div>
         <div className="text-[10px] font-mono bg-[#0c0d14] border border-[#1e2030] px-3 py-1.5 rounded text-gray-500 flex items-center gap-2">
@@ -215,7 +223,7 @@ export default function Timeline() {
           className="w-full bg-[#0c0d14] border border-[#1e2030] text-xs text-white rounded-md pl-10 pr-10 py-2.5 hover:border-[#2e3045] focus:outline-none focus:border-purple-500/80 transition-colors placeholder:text-gray-600"
         />
         {search && (
-          <button 
+          <button
             onClick={() => setSearch('')}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-white cursor-pointer"
             title="Clear Search"
@@ -257,7 +265,7 @@ export default function Timeline() {
       {!isCommitsLoading && commits.length === 0 && (
         <div className="p-8 bg-[#0c0d14] rounded border border-[#1e2030] max-w-2xl text-center space-y-2">
           <p className="text-xs text-gray-400">No commits matched your search filter.</p>
-          <button 
+          <button
             onClick={() => setSearch('')}
             className="text-[10px] text-purple-400 hover:underline font-mono"
           >
@@ -276,12 +284,13 @@ export default function Timeline() {
               </div>
 
               {/* Commit Item Container */}
-              <div 
+              <div
                 onClick={() => setSearchParams({ commit: commit.hash })}
                 className={`p-4 rounded-lg border transition-all space-y-2.5 cursor-pointer animate-fadeIn
-                  ${activeCommitHash === commit.hash 
-                    ? 'bg-[#161722] border-purple-500/80 shadow-md shadow-purple-500/5' 
-                    : 'bg-[#0c0d14] border-[#1e2030] hover:border-purple-500/30'
+                  ${
+                    activeCommitHash === commit.hash
+                      ? 'bg-[#161722] border-purple-500/80 shadow-md shadow-purple-500/5'
+                      : 'bg-[#0c0d14] border-[#1e2030] hover:border-purple-500/30'
                   }`}
               >
                 {/* Meta block */}
@@ -332,7 +341,9 @@ export default function Timeline() {
           )}
 
           {!hasNextPage && commits.length > 0 && (
-            <p className="text-[10px] font-mono text-gray-600 pl-2">Reached end of commit history.</p>
+            <p className="text-[10px] font-mono text-gray-600 pl-2">
+              Reached end of commit history.
+            </p>
           )}
         </div>
       )}

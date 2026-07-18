@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useSearchParams } from 'react-router-dom';
-import { 
-  Compass, 
-  GitBranch, 
-  GitCommit, 
-  Search, 
-  Settings, 
-  PanelRightClose, 
-  PanelRight, 
-  Menu, 
+import {
+  Compass,
+  GitBranch,
+  GitCommit,
+  Search,
+  Settings,
+  PanelRightClose,
+  PanelRight,
+  Menu,
   X,
   FileText,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import type { HealthResponse, CommitDetails } from '@tracemind/shared';
@@ -21,21 +21,30 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const renderDiffLine = (line: string, index: number) => {
   if (line.startsWith('+') && !line.startsWith('+++')) {
     return (
-      <div key={index} className="bg-emerald-950/20 text-emerald-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-emerald-500 select-text">
+      <div
+        key={index}
+        className="bg-emerald-950/20 text-emerald-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-emerald-500 select-text"
+      >
         {line}
       </div>
     );
   }
   if (line.startsWith('-') && !line.startsWith('---')) {
     return (
-      <div key={index} className="bg-red-950/20 text-red-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-red-500 select-text">
+      <div
+        key={index}
+        className="bg-red-950/20 text-red-400 font-mono text-[10px] py-0.5 px-3 border-l-2 border-red-500 select-text"
+      >
         {line}
       </div>
     );
   }
   if (line.startsWith('@@')) {
     return (
-      <div key={index} className="bg-purple-950/10 text-purple-400 font-mono text-[10px] py-0.5 px-3 font-semibold select-text">
+      <div
+        key={index}
+        className="bg-purple-950/10 text-purple-400 font-mono text-[10px] py-0.5 px-3 font-semibold select-text"
+      >
         {line}
       </div>
     );
@@ -55,7 +64,11 @@ export default function Layout() {
   const commitHash = searchParams.get('commit');
 
   // Query commit details if a hash is selected
-  const { data: commitResponse, isLoading: isCommitLoading, isError: isCommitError } = useQuery<{
+  const {
+    data: commitResponse,
+    isLoading: isCommitLoading,
+    isError: isCommitError,
+  } = useQuery<{
     success: boolean;
     data: CommitDetails;
   }>({
@@ -107,11 +120,16 @@ export default function Layout() {
   // Helper to map route path to readable page titles
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/': return 'Dashboard';
-      case '/repositories': return 'Repositories';
-      case '/timeline': return 'Commit Timeline';
-      case '/investigate': return 'AI Investigation';
-      default: return 'TraceMind';
+      case '/':
+        return 'Dashboard';
+      case '/repositories':
+        return 'Repositories';
+      case '/timeline':
+        return 'Commit Timeline';
+      case '/investigate':
+        return 'AI Investigation';
+      default:
+        return 'TraceMind';
     }
   };
 
@@ -124,7 +142,6 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen w-screen bg-[#090a0f] text-[#9ca3af] font-sans antialiased overflow-hidden">
-      
       {/* Mobile Header */}
       <header className="lg:hidden h-14 border-b border-[#1e2030] bg-[#0c0d14] flex items-center justify-between px-4 w-full fixed top-0 left-0 z-50">
         <div className="flex items-center gap-2">
@@ -135,9 +152,11 @@ export default function Layout() {
         </div>
         <div className="flex items-center gap-3">
           {/* Connection Status Icon */}
-          <div className={`w-2 h-2 rounded-full ${isError ? 'bg-red-500' : data?.success ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-          <button 
-            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} 
+          <div
+            className={`w-2 h-2 rounded-full ${isError ? 'bg-red-500' : data?.success ? 'bg-emerald-400' : 'bg-amber-400'}`}
+          />
+          <button
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
             className="text-gray-400 hover:text-white cursor-pointer"
           >
             {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -146,12 +165,14 @@ export default function Layout() {
       </header>
 
       {/* 1. Left Sidebar Panel */}
-      <aside className={`
+      <aside
+        className={`
         fixed inset-y-0 left-0 z-40 w-64 border-r border-[#1e2030] bg-[#0c0d14] p-4 flex flex-col justify-between shrink-0
         transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static
         ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         ${mobileSidebarOpen ? 'pt-18 lg:pt-4' : 'pt-4'}
-      `}>
+      `}
+      >
         <div>
           {/* Logo Section */}
           <div className="hidden lg:flex items-center gap-2.5 px-2 py-1.5 mb-6">
@@ -160,7 +181,9 @@ export default function Layout() {
             </div>
             <div>
               <h1 className="text-sm font-semibold text-white tracking-wide">TraceMind</h1>
-              <span className="text-[10px] text-purple-400 font-mono tracking-widest uppercase">Investigator</span>
+              <span className="text-[10px] text-purple-400 font-mono tracking-widest uppercase">
+                Investigator
+              </span>
             </div>
           </div>
 
@@ -175,9 +198,10 @@ export default function Layout() {
                   onClick={() => setMobileSidebarOpen(false)}
                   className={({ isActive }) => `
                     flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md transition-colors cursor-pointer
-                    ${isActive 
-                      ? 'bg-[#161722] text-white border border-[#2e3045]' 
-                      : 'text-[#9ca3af] hover:bg-[#161722]/50 hover:text-white border border-transparent'
+                    ${
+                      isActive
+                        ? 'bg-[#161722] text-white border border-[#2e3045]'
+                        : 'text-[#9ca3af] hover:bg-[#161722]/50 hover:text-white border border-transparent'
                     }
                   `}
                 >
@@ -195,17 +219,29 @@ export default function Layout() {
           <div className="flex items-center justify-between px-2 text-[10px] font-mono">
             <span className="text-gray-500">API Gateway</span>
             <div className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${isError ? 'bg-red-500' : data?.success ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              <span 
-                className={isError ? 'text-red-400 cursor-help' : data?.success ? 'text-emerald-400' : 'text-amber-400'}
-                title={isError ? 'API offline. If using a cloud API URL containing "trace" (like tracemind), please disable your ad-blocker on this page.' : undefined}
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${isError ? 'bg-red-500' : data?.success ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}
+              />
+              <span
+                className={
+                  isError
+                    ? 'text-red-400 cursor-help'
+                    : data?.success
+                      ? 'text-emerald-400'
+                      : 'text-amber-400'
+                }
+                title={
+                  isError
+                    ? 'API offline. If using a cloud API URL containing "trace" (like tracemind), please disable your ad-blocker on this page.'
+                    : undefined
+                }
               >
                 {isError ? 'Offline ⓘ' : data?.success ? 'Connected' : 'Connecting'}
               </span>
             </div>
           </div>
-          <button 
-            onClick={() => setInspectorOpen(prev => !prev)}
+          <button
+            onClick={() => setInspectorOpen((prev) => !prev)}
             className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-md text-gray-400 hover:text-white hover:bg-[#161722]/50 transition-colors cursor-pointer text-left"
           >
             <Settings className="w-4 h-4" />
@@ -216,15 +252,14 @@ export default function Layout() {
 
       {/* Overlay for mobile sidebar */}
       {mobileSidebarOpen && (
-        <div 
-          onClick={() => setMobileSidebarOpen(false)} 
+        <div
+          onClick={() => setMobileSidebarOpen(false)}
           className="fixed inset-0 z-30 bg-black/50 lg:hidden"
         />
       )}
 
       {/* 2. Main Content Wrapper */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden pt-14 lg:pt-0">
-        
         {/* Navigation Bar / Header */}
         <header className="h-14 border-b border-[#1e2030] flex items-center justify-between px-6 bg-[#090a0f] shrink-0">
           <div className="flex items-center gap-2 text-xs font-mono">
@@ -238,7 +273,7 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             {/* Health Monitor Label */}
             {isError && (
-              <div 
+              <div
                 className="flex items-center gap-1.5 text-[10px] font-mono text-red-400 bg-red-950/20 border border-red-900/30 px-2 py-1 rounded cursor-help"
                 title="API is unreachable. If online, check if your ad-blocker is blocking domain names containing the word 'trace' (e.g. tracemind)."
               >
@@ -246,14 +281,18 @@ export default function Layout() {
                 <span>API Offline (Ad-blocker?)</span>
               </div>
             )}
-            
+
             {/* Inspector Toggle Button */}
-            <button 
+            <button
               onClick={() => setInspectorOpen(!inspectorOpen)}
               className="text-gray-400 hover:text-white p-1.5 rounded-md hover:bg-[#161722] cursor-pointer transition-all active:scale-95 border border-transparent hover:border-[#1e2030]"
               title={inspectorOpen ? 'Hide Inspector' : 'Show Inspector'}
             >
-              {inspectorOpen ? <PanelRightClose className="w-4 h-4 text-purple-400" /> : <PanelRight className="w-4 h-4" />}
+              {inspectorOpen ? (
+                <PanelRightClose className="w-4 h-4 text-purple-400" />
+              ) : (
+                <PanelRight className="w-4 h-4" />
+              )}
             </button>
           </div>
         </header>
@@ -265,11 +304,13 @@ export default function Layout() {
           </main>
 
           {/* 3. Right Inspector Panel */}
-          <aside className={`
+          <aside
+            className={`
             border-l border-[#1e2030] bg-[#0c0d14] flex flex-col shrink-0 overflow-y-auto transition-all duration-200
             ${inspectorOpen ? 'w-[400px] p-6 opacity-100' : 'w-0 p-0 opacity-0 border-l-0'}
             hidden md:flex
-          `}>
+          `}
+          >
             {commitHash ? (
               <div className="flex-1 flex flex-col space-y-4 min-w-0">
                 {/* Header */}
@@ -280,7 +321,7 @@ export default function Layout() {
                       Commit Details
                     </h2>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
                       const params = new URLSearchParams(searchParams);
                       params.delete('commit');
@@ -313,7 +354,9 @@ export default function Layout() {
                     <div className="bg-[#090a0f] p-3.5 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500">Hash:</span>
-                        <span className="text-purple-400 font-semibold select-all">{commit.hash}</span>
+                        <span className="text-purple-400 font-semibold select-all">
+                          {commit.hash}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500">Author:</span>
@@ -321,13 +364,17 @@ export default function Layout() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500">Date:</span>
-                        <span className="text-gray-300">{new Date(commit.date).toLocaleString()}</span>
+                        <span className="text-gray-300">
+                          {new Date(commit.date).toLocaleString()}
+                        </span>
                       </div>
                     </div>
 
                     {/* Commit Message */}
                     <div className="space-y-1.5">
-                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Message</div>
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                        Message
+                      </div>
                       <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] text-xs text-white whitespace-pre-wrap leading-relaxed">
                         {commit.message}
                       </div>
@@ -335,10 +382,14 @@ export default function Layout() {
 
                     {/* Stats */}
                     <div className="space-y-1.5">
-                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Impact Stats</div>
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                        Impact Stats
+                      </div>
                       <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
                         <div className="bg-emerald-950/15 border border-emerald-900/35 py-2 rounded-lg">
-                          <div className="text-emerald-400 font-bold">+{commit.stats.additions}</div>
+                          <div className="text-emerald-400 font-bold">
+                            +{commit.stats.additions}
+                          </div>
                           <div className="text-[9px] text-gray-500 pt-0.5 uppercase">additions</div>
                         </div>
                         <div className="bg-red-950/15 border border-red-900/35 py-2 rounded-lg">
@@ -346,7 +397,9 @@ export default function Layout() {
                           <div className="text-[9px] text-gray-500 pt-0.5 uppercase">deletions</div>
                         </div>
                         <div className="bg-purple-950/15 border border-purple-900/35 py-2 rounded-lg">
-                          <div className="text-purple-400 font-bold">{commit.stats.filesChanged}</div>
+                          <div className="text-purple-400 font-bold">
+                            {commit.stats.filesChanged}
+                          </div>
                           <div className="text-[9px] text-gray-500 pt-0.5 uppercase">files</div>
                         </div>
                       </div>
@@ -354,12 +407,19 @@ export default function Layout() {
 
                     {/* Changed Files */}
                     <div className="space-y-1.5 flex flex-col min-h-0">
-                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Modified Files</div>
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                        Modified Files
+                      </div>
                       <div className="bg-[#090a0f] border border-[#1e2030] rounded-lg p-2.5 max-h-36 overflow-y-auto space-y-1">
                         {commit.filesChanged.map((file) => (
-                          <div key={file} className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300 hover:text-white truncate">
+                          <div
+                            key={file}
+                            className="flex items-center gap-1.5 text-[10px] font-mono text-gray-300 hover:text-white truncate"
+                          >
                             <span className="text-purple-400/80">•</span>
-                            <span className="truncate" title={file}>{file}</span>
+                            <span className="truncate" title={file}>
+                              {file}
+                            </span>
                           </div>
                         ))}
                         {commit.filesChanged.length === 0 && (
@@ -370,13 +430,17 @@ export default function Layout() {
 
                     {/* Diff View */}
                     <div className="space-y-1.5 flex-1 flex flex-col min-h-0">
-                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Unified Diff</div>
+                      <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                        Unified Diff
+                      </div>
                       <div className="flex-1 border border-[#1e2030] bg-[#090a0f] rounded-lg overflow-hidden flex flex-col min-h-[220px]">
                         <div className="flex-1 overflow-y-auto py-2 whitespace-pre select-text">
                           {commit.diff ? (
                             commit.diff.split('\n').map(renderDiffLine)
                           ) : (
-                            <div className="text-[10px] text-gray-600 italic px-3 py-1">No diff content.</div>
+                            <div className="text-[10px] text-gray-600 italic px-3 py-1">
+                              No diff content.
+                            </div>
                           )}
                         </div>
                       </div>
@@ -387,24 +451,35 @@ export default function Layout() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">Inspector Panel</h2>
+                  <h2 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">
+                    Inspector Panel
+                  </h2>
                   <FileText className="w-4 h-4 text-purple-400" />
                 </div>
                 <p className="text-[11px] text-gray-400 leading-normal">
-                  This panel displays evidence, commit details, confidence levels, and context matching your AI investigations.
+                  This panel displays evidence, commit details, confidence levels, and context
+                  matching your AI investigations.
                 </p>
-                
+
                 <div className="p-4 rounded-lg border border-[#1e2030] bg-[#090a0f] text-xs space-y-2">
                   <div className="font-semibold text-white">Quick Guide:</div>
                   <ul className="list-disc pl-4 space-y-1 text-[#838b9c]">
-                    <li>Navigate to <b>Repositories</b> to specify a Git path.</li>
-                    <li>Go to <b>Timeline</b> to inspect commits.</li>
-                    <li>Use <b>AI Investigation</b> to analyze root causes.</li>
+                    <li>
+                      Navigate to <b>Repositories</b> to specify a Git path.
+                    </li>
+                    <li>
+                      Go to <b>Timeline</b> to inspect commits.
+                    </li>
+                    <li>
+                      Use <b>AI Investigation</b> to analyze root causes.
+                    </li>
                   </ul>
                 </div>
 
                 <div className="pt-4 border-t border-[#1e2030]/50 space-y-2">
-                  <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Session Details</div>
+                  <div className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">
+                    Session Details
+                  </div>
                   <div className="bg-[#090a0f] p-3 rounded-lg border border-[#1e2030] font-mono text-[10px] space-y-1">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Env:</span>
@@ -420,9 +495,7 @@ export default function Layout() {
             )}
           </aside>
         </div>
-
       </div>
-
     </div>
   );
 }

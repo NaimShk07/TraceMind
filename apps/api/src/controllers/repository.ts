@@ -8,11 +8,7 @@ import type { RepositoryDetails } from '@tracemind/shared';
 
 const gitService = new GitService();
 
-export const importRepository = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const importRepository = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Validate request body
     const validated = ImportRepositorySchema.parse(req.body);
@@ -48,15 +44,11 @@ export const importRepository = async (
   }
 };
 
-export const getRepositoryDetails = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getRepositoryDetails = (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
     const repo = repositoryStore.getRepository(id);
-    
+
     if (!repo) {
       throw new NotFoundError(`Repository with ID "${id}" not found`);
     }
@@ -70,11 +62,7 @@ export const getRepositoryDetails = (
   }
 };
 
-export const getActiveRepository = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getActiveRepository = (req: Request, res: Response, next: NextFunction) => {
   try {
     const repo = repositoryStore.getActiveRepository();
 
@@ -87,15 +75,11 @@ export const getActiveRepository = (
   }
 };
 
-export const getRepositoryCommits = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getRepositoryCommits = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params as { id: string };
-    const page = parseInt(req.query.page as string || '1', 10);
-    const limit = parseInt(req.query.limit as string || '20', 10);
+    const page = parseInt((req.query.page as string) || '1', 10);
+    const limit = parseInt((req.query.limit as string) || '20', 10);
     const search = req.query.search as string | undefined;
 
     const repo = repositoryStore.getRepository(id);

@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { 
-  importRepository, 
-  getRepositoryDetails, 
+import {
+  importRepository,
+  getRepositoryDetails,
   getActiveRepository,
-  getRepositoryCommits
+  getRepositoryCommits,
 } from '../controllers/repository.js';
 
 const router = Router();

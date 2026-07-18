@@ -30,9 +30,7 @@ describe('REST API Endpoints Integration Tests', () => {
   });
 
   it('POST /chat should validate fields and return 400 for missing question parameter', async () => {
-    const res = await request(app)
-      .post('/chat')
-      .send({ repositoryId: 'test-repo-id' });
+    const res = await request(app).post('/chat').send({ repositoryId: 'test-repo-id' });
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');

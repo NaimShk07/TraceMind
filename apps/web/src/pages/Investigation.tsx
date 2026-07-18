@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSearchParams, Link } from 'react-router-dom';
-import { 
-  Send, 
-  Sparkles, 
-  Terminal, 
-  User, 
-  Loader2, 
-  AlertCircle, 
+import {
+  Send,
+  Sparkles,
+  Terminal,
+  User,
+  Loader2,
+  AlertCircle,
   ArrowRight,
   GitCommit,
   ExternalLink,
@@ -16,9 +16,14 @@ import {
   ChevronUp,
   Clock,
   User as UserIcon,
-  Check
+  Check,
 } from 'lucide-react';
-import type { RepositoryDetails, ChatResponse, EvidenceItem, CommitDetails } from '@tracemind/shared';
+import type {
+  RepositoryDetails,
+  ChatResponse,
+  EvidenceItem,
+  CommitDetails,
+} from '@tracemind/shared';
 import { motion } from 'framer-motion';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 interface ChatMessage {
@@ -36,13 +41,13 @@ function RAGTerminalLoader() {
     'Retrieving local commit logs from GitEngine',
     'Calculating relevance scores across candidate commits',
     'Extracting changed files and unified patch diffs',
-    'Assembling RAG context and querying Gemini model'
+    'Assembling RAG context and querying Gemini model',
   ];
 
   useEffect(() => {
     const intervals = [600, 700, 800, 700, 900];
     let current = 0;
-    
+
     const runNext = () => {
       if (current < steps.length - 1) {
         setTimeout(() => {
@@ -76,8 +81,8 @@ function RAGTerminalLoader() {
             <motion.div
               key={index}
               initial={{ opacity: 0, x: -5 }}
-              animate={{ 
-                opacity: isPending ? 0.35 : 1, 
+              animate={{
+                opacity: isPending ? 0.35 : 1,
                 x: 0,
               }}
               transition={{ duration: 0.3 }}
@@ -89,7 +94,7 @@ function RAGTerminalLoader() {
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                   >
                     <Check className="w-3.5 h-3.5 text-emerald-400 font-bold" strokeWidth={3} />
                   </motion.div>
@@ -97,19 +102,19 @@ function RAGTerminalLoader() {
                 {isActive && (
                   <div className="w-2.5 h-2.5 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
                 )}
-                {isPending && (
-                  <div className="w-1 h-1 rounded-full bg-gray-700" />
-                )}
+                {isPending && <div className="w-1 h-1 rounded-full bg-gray-700" />}
               </div>
 
               {/* Step Label */}
-              <span className={`transition-colors duration-300 ${
-                isCompleted 
-                  ? 'text-gray-400 font-medium' 
-                  : isActive 
-                    ? 'text-purple-300 font-semibold' 
-                    : 'text-gray-600'
-              }`}>
+              <span
+                className={`transition-colors duration-300 ${
+                  isCompleted
+                    ? 'text-gray-400 font-medium'
+                    : isActive
+                      ? 'text-purple-300 font-semibold'
+                      : 'text-gray-600'
+                }`}
+              >
                 {isCompleted ? `[OK] ${label}` : isActive ? `[RUN] ${label}...` : `[PEND] ${label}`}
               </span>
             </motion.div>
@@ -157,7 +162,11 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
   const hash = item.hash;
 
   // Query commit details only when expanded and hash is present
-  const { data: commitResponse, isLoading, isError } = useQuery<{
+  const {
+    data: commitResponse,
+    isLoading,
+    isError,
+  } = useQuery<{
     success: boolean;
     data: CommitDetails;
   }>({
@@ -176,21 +185,30 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
   const formatDiffLine = (line: string, index: number) => {
     if (line.startsWith('+') && !line.startsWith('+++')) {
       return (
-        <div key={index} className="bg-emerald-950/30 text-emerald-300 px-2 py-0.5 border-l-2 border-emerald-500 font-mono text-[10px] whitespace-pre">
+        <div
+          key={index}
+          className="bg-emerald-950/30 text-emerald-300 px-2 py-0.5 border-l-2 border-emerald-500 font-mono text-[10px] whitespace-pre"
+        >
           {line}
         </div>
       );
     }
     if (line.startsWith('-') && !line.startsWith('---')) {
       return (
-        <div key={index} className="bg-rose-950/30 text-rose-300 px-2 py-0.5 border-l-2 border-rose-500 font-mono text-[10px] whitespace-pre">
+        <div
+          key={index}
+          className="bg-rose-950/30 text-rose-300 px-2 py-0.5 border-l-2 border-rose-500 font-mono text-[10px] whitespace-pre"
+        >
           {line}
         </div>
       );
     }
     if (line.startsWith('@@')) {
       return (
-        <div key={index} className="bg-[#1a1c2a] text-purple-300 px-2 py-0.5 font-mono text-[10px] font-semibold whitespace-pre">
+        <div
+          key={index}
+          className="bg-[#1a1c2a] text-purple-300 px-2 py-0.5 font-mono text-[10px] font-semibold whitespace-pre"
+        >
           {line}
         </div>
       );
@@ -207,10 +225,12 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
       <div className="p-2.5 flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <span className="font-semibold text-white truncate text-[10px]">{item.title}</span>
-          <span className="text-[8px] uppercase tracking-wider font-mono text-[#626875] shrink-0">{item.type}</span>
+          <span className="text-[8px] uppercase tracking-wider font-mono text-[#626875] shrink-0">
+            {item.type}
+          </span>
         </div>
         <p className="text-[#838b9c] text-[10px] leading-normal">{item.description}</p>
-        
+
         <div className="mt-2 flex items-center gap-2">
           {item.hash && (
             <>
@@ -227,7 +247,11 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
                 className="inline-flex items-center gap-1 text-[9px] bg-[#161722] hover:bg-[#222436] text-gray-300 hover:text-white border border-[#2e3045] px-2 py-0.5 rounded cursor-pointer transition-colors animate-fadeIn"
               >
                 <span>{isExpanded ? 'Collapse' : 'Show Diff Preview'}</span>
-                {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                {isExpanded ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
               </button>
             </>
           )}
@@ -292,8 +316,10 @@ const renderMarkdown = (text: string) => {
 };
 
 const parseReport = (text: string) => {
-  const summaryRegex = /(?:[0-9]*\.\s*)?\*\*(?:Summary|Executive Summary)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause|Suggested Fix|Recommended Fix)\*\*|$)/i;
-  const rootCauseRegex = /(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Suggested Fix|Recommended Fix)\*\*|$)/i;
+  const summaryRegex =
+    /(?:[0-9]*\.\s*)?\*\*(?:Summary|Executive Summary)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause|Suggested Fix|Recommended Fix)\*\*|$)/i;
+  const rootCauseRegex =
+    /(?:[0-9]*\.\s*)?\*\*(?:Reasoning|Root Cause)\*\*:\s*([\s\S]*?)(?=(?:[0-9]*\.\s*)?\*\*(?:Suggested Fix|Recommended Fix)\*\*|$)/i;
   const fixRegex = /(?:[0-9]*\.\s*)?\*\*(?:Suggested Fix|Recommended Fix)\*\*:\s*([\s\S]*)$/i;
 
   const summaryMatch = text.match(summaryRegex);
@@ -314,7 +340,12 @@ interface InvestigationReportProps {
   setSearchParams: any;
 }
 
-function InvestigationReport({ text, confidence, evidence = [], setSearchParams }: InvestigationReportProps) {
+function InvestigationReport({
+  text,
+  confidence,
+  evidence = [],
+  setSearchParams,
+}: InvestigationReportProps) {
   const parsed = parseReport(text);
   const hasParsedSections = parsed.summary || parsed.rootCause || parsed.recommendedFix;
 
@@ -327,15 +358,15 @@ function InvestigationReport({ text, confidence, evidence = [], setSearchParams 
             <Terminal className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-white tracking-wider uppercase font-mono">Investigation Report</h4>
+            <h4 className="text-xs font-bold text-white tracking-wider uppercase font-mono">
+              Investigation Report
+            </h4>
             <span className="inline-flex items-center gap-1 text-[8px] bg-purple-950/30 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-mono font-medium animate-pulse">
               STATUS: DIAGNOSED
             </span>
           </div>
         </div>
-        {confidence !== undefined && (
-          <ConfidenceGauge value={confidence} />
-        )}
+        {confidence !== undefined && <ConfidenceGauge value={confidence} />}
       </div>
 
       {!hasParsedSections ? (
@@ -347,7 +378,9 @@ function InvestigationReport({ text, confidence, evidence = [], setSearchParams 
           {/* Summary */}
           {parsed.summary && (
             <div className="space-y-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Summary</span>
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">
+                Summary
+              </span>
               <div className="bg-[#07080c] border border-[#1e2030] p-3 rounded-lg text-gray-300 select-text">
                 {renderMarkdown(parsed.summary)}
               </div>
@@ -357,7 +390,9 @@ function InvestigationReport({ text, confidence, evidence = [], setSearchParams 
           {/* Root Cause */}
           {parsed.rootCause && (
             <div className="space-y-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-purple-400 uppercase font-bold">Root Cause</span>
+              <span className="text-[9px] font-mono tracking-widest text-purple-400 uppercase font-bold">
+                Root Cause
+              </span>
               <div className="pl-3 border-l-2 border-purple-500/40 select-text space-y-1">
                 {renderMarkdown(parsed.rootCause)}
               </div>
@@ -367,7 +402,9 @@ function InvestigationReport({ text, confidence, evidence = [], setSearchParams 
           {/* Recommended Fix */}
           {parsed.recommendedFix && (
             <div className="space-y-1.5">
-              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Recommended Fix</span>
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">
+                Recommended Fix
+              </span>
               <div className="bg-[#07080c] border border-[#1e2030] p-3 rounded-lg font-mono text-[10px] overflow-x-auto text-gray-300 select-text whitespace-pre-wrap">
                 {renderMarkdown(parsed.recommendedFix)}
               </div>
@@ -377,7 +414,9 @@ function InvestigationReport({ text, confidence, evidence = [], setSearchParams 
           {/* Evidence Timeline */}
           {evidence.length > 0 && (
             <div className="space-y-3 border-t border-[#1e2030]/60 pt-3">
-              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">Evidence & Commit Timeline</span>
+              <span className="text-[9px] font-mono tracking-widest text-[#626875] uppercase font-bold">
+                Evidence & Commit Timeline
+              </span>
               <div className="space-y-2">
                 {evidence.map((item, idx) => (
                   <EvidenceCard key={idx} item={item} setSearchParams={setSearchParams} />
@@ -395,10 +434,10 @@ export default function Investigation() {
   const [query, setQuery] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { 
-      sender: 'assistant', 
-      text: "Hello! I am your TraceMind agent. Ask me any question about the codebase's history or file details (e.g. 'Is there a memory leak in the buffer allocation?'). I will analyze Git history, compile relevant diffs, and generate an evidence-backed answer." 
-    }
+    {
+      sender: 'assistant',
+      text: "Hello! I am your TraceMind agent. Ask me any question about the codebase's history or file details (e.g. 'Is there a memory leak in the buffer allocation?'). I will analyze Git history, compile relevant diffs, and generate an evidence-backed answer.",
+    },
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -418,7 +457,7 @@ export default function Investigation() {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if typing inside input or textarea
       if (
-        document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
         document.activeElement?.tagName === 'SELECT'
       ) {
@@ -436,7 +475,11 @@ export default function Investigation() {
   }, []);
 
   // 1. Fetch active repository
-  const { data: activeRepoResponse, isLoading: isRepoLoading, isError: isRepoError } = useQuery<{
+  const {
+    data: activeRepoResponse,
+    isLoading: isRepoLoading,
+    isError: isRepoError,
+  } = useQuery<{
     success: boolean;
     data: RepositoryDetails | null;
   }>({
@@ -445,7 +488,7 @@ export default function Investigation() {
       const res = await fetch(`${API_BASE}/repositories/active`);
       if (!res.ok) throw new Error('API offline');
       return res.json();
-    }
+    },
   });
 
   const activeRepo = activeRepoResponse?.data;
@@ -499,7 +542,6 @@ export default function Investigation() {
     chatMutation.mutate({ question: questionText });
   };
 
-
   const initialQuery = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -521,7 +563,7 @@ export default function Investigation() {
   const suggestedPrompts = [
     'Is there a memory leak in socket connection pool?',
     'Explain the changes in the latest commits.',
-    'Find commits modifying package.json.'
+    'Find commits modifying package.json.',
   ];
 
   // Render Skeleton Loader for the chat history container
@@ -552,7 +594,8 @@ export default function Investigation() {
         <AlertCircle className="w-10 h-10 text-red-400 mx-auto" />
         <h3 className="text-sm font-semibold text-white">Connection Failure</h3>
         <p className="text-xs text-red-300">
-          Failed to establish a connection to the backend REST API. Make sure the server is online at <code>localhost:3001</code>.
+          Failed to establish a connection to the backend REST API. Make sure the server is online
+          at <code>localhost:3001</code>.
         </p>
       </div>
     );
@@ -567,7 +610,9 @@ export default function Investigation() {
             <Sparkles className="w-5 h-5 text-purple-400" />
             <span>AI Investigator</span>
           </h2>
-          <p className="text-xs text-[#626875]">Run natural language queries to investigate root causes of bugs.</p>
+          <p className="text-xs text-[#626875]">
+            Run natural language queries to investigate root causes of bugs.
+          </p>
         </div>
 
         <div className="p-8 bg-[#0c0d14] rounded-lg border border-[#1e2030] max-w-xl text-center space-y-4">
@@ -575,7 +620,8 @@ export default function Investigation() {
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-white">No repository selected</h3>
             <p className="text-xs text-gray-400 max-w-sm mx-auto leading-relaxed">
-              In order to perform AI codebase investigations, you must first import a local Git repository.
+              In order to perform AI codebase investigations, you must first import a local Git
+              repository.
             </p>
           </div>
           <Link
@@ -599,25 +645,32 @@ export default function Investigation() {
           <span>AI Investigator</span>
         </h2>
         <p className="text-xs text-[#626875]">
-          Analyze active repository <span className="text-gray-300 font-mono font-medium">{activeRepo.name}</span>.
+          Analyze active repository{' '}
+          <span className="text-gray-300 font-mono font-medium">{activeRepo.name}</span>.
         </p>
       </div>
 
       {/* Chat Messages Log */}
       <div className="flex-1 overflow-y-auto space-y-4 bg-[#0c0d14]/30 p-4 rounded-lg border border-[#1e2030] min-h-[350px] max-h-[500px]">
         {messages.map((msg, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={`flex gap-3 max-w-3xl animate-fadeIn ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
           >
             {/* Avatar */}
-            <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border
-              ${msg.sender === 'user' 
-                ? 'bg-purple-600/10 border-purple-500/20 text-purple-300' 
-                : 'bg-indigo-600/10 border-indigo-500/20 text-indigo-300'
+            <div
+              className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border
+              ${
+                msg.sender === 'user'
+                  ? 'bg-purple-600/10 border-purple-500/20 text-purple-300'
+                  : 'bg-indigo-600/10 border-indigo-500/20 text-indigo-300'
               }`}
             >
-              {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Terminal className="w-4 h-4" />}
+              {msg.sender === 'user' ? (
+                <User className="w-4 h-4" />
+              ) : (
+                <Terminal className="w-4 h-4" />
+              )}
             </div>
 
             {/* Bubble */}
@@ -661,7 +714,9 @@ export default function Investigation() {
       {/* Suggested Prompts Block */}
       {messages.length === 1 && !chatMutation.isPending && (
         <div className="space-y-1.5 animate-slideUp">
-          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">Suggested Investigations</div>
+          <div className="text-[9px] uppercase tracking-wider text-gray-500 font-mono font-bold">
+            Suggested Investigations
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {suggestedPrompts.map((prompt) => (
               <button
@@ -678,17 +733,17 @@ export default function Investigation() {
 
       {/* Input Box */}
       <form onSubmit={onSubmit} className="flex gap-2">
-        <input 
+        <input
           ref={chatInputRef}
-          type="text" 
-          placeholder="Ask a question... (Press '/' or 'Cmd+K' to focus)" 
+          type="text"
+          placeholder="Ask a question... (Press '/' or 'Cmd+K' to focus)"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           disabled={chatMutation.isPending}
           className="flex-1 bg-[#0c0d14] border border-[#1e2030] focus:border-purple-500/80 rounded-md py-2.5 px-4 text-xs text-white placeholder-gray-600 outline-none transition-colors disabled:opacity-50"
         />
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={!query.trim() || chatMutation.isPending}
           className="bg-purple-600 hover:bg-purple-700 disabled:bg-[#1e2030] text-white disabled:text-gray-500 p-2.5 rounded-md cursor-pointer transition-colors active:scale-95 disabled:pointer-events-none"
         >

@@ -10,7 +10,9 @@ export class AiService {
   constructor() {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      logger.warn('GEMINI_API_KEY environment variable is not defined. Running AiService in MOCK MODE.');
+      logger.warn(
+        'GEMINI_API_KEY environment variable is not defined. Running AiService in MOCK MODE.',
+      );
       this.isMockMode = true;
     } else {
       this.genAI = new GoogleGenerativeAI(apiKey);
@@ -30,8 +32,14 @@ export class AiService {
           temperature: 0.3,
         },
         safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+          {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_NONE,
+          },
         ],
       });
 
@@ -64,7 +72,7 @@ Answer using ONLY the provided context. Respond with a single valid JSON object:
         const retryMatch = err?.message?.match(/retry in ([\d.]+)s/i);
         const retrySeconds = retryMatch ? Math.ceil(parseFloat(retryMatch[1])) : 60;
         throw new InternalServerError(
-          `AI is currently rate-limited. The free-tier quota is exhausted. Please try again in ${retrySeconds} seconds, or upgrade your Google AI Studio API key.`
+          `AI is currently rate-limited. The free-tier quota is exhausted. Please try again in ${retrySeconds} seconds, or upgrade your Google AI Studio API key.`,
         );
       }
 
@@ -94,7 +102,11 @@ Answer using ONLY the provided context. Respond with a single valid JSON object:
     logger.info(`Generating mock AI response for question: "${question}"`);
     const questionLower = question.toLowerCase();
 
-    if (questionLower.includes('leak') || questionLower.includes('memory') || questionLower.includes('socket')) {
+    if (
+      questionLower.includes('leak') ||
+      questionLower.includes('memory') ||
+      questionLower.includes('socket')
+    ) {
       return {
         answer: `**Summary**:\nA potential memory leak was identified in buffer allocation blocks.\n\n**Reasoning**:\nCommit 02dd778 cleaned up heavy cache indexes that were holding transient module allocations in node_modules directories.\n\n**Suggested Fix**:\nEnsure all socket connections are explicitly closed in the finally block and run a heap snapshot analysis before and after connection teardown.`,
         confidence: 0.85,
@@ -102,7 +114,8 @@ Answer using ONLY the provided context. Respond with a single valid JSON object:
           {
             type: 'commit',
             title: 'untrack node_modules and setup .gitignore',
-            description: 'This commit cleaned up heavy cache indexes that were holding transient module allocations.',
+            description:
+              'This commit cleaned up heavy cache indexes that were holding transient module allocations.',
             hash: '02dd7783976917d51f0c8bc7ea534874544f8d45',
           },
         ],
@@ -112,7 +125,7 @@ Answer using ONLY the provided context. Respond with a single valid JSON object:
     if (questionLower.includes('package') || questionLower.includes('depend')) {
       return {
         answer: `**Summary**:\nThe package.json was modified in 2 commits.\n\n**Reasoning**:\nThe initial commit established the project dependencies. A subsequent commit added .gitignore to properly track only source files.\n\n**Suggested Fix**:\nReview package-lock.json for any version mismatches and run \`pnpm audit\` to check for vulnerabilities.`,
-        confidence: 0.90,
+        confidence: 0.9,
         evidence: [
           {
             type: 'file',

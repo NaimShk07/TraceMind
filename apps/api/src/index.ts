@@ -45,7 +45,7 @@ if (process.env.NODE_ENV !== 'test') {
       logger.info(`Demo repository not found or not initialized at ${demoPath}. Auto-seeding...`);
       execSync(`pnpm --filter @tracemind/api exec tsx "${scriptPath}"`, {
         cwd: workspaceRoot,
-        stdio: 'inherit'
+        stdio: 'inherit',
       });
     }
   } catch (err: any) {

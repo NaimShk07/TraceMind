@@ -1,5 +1,64 @@
 import type { CommitMetadata } from '@tracemind/shared';
 
+const getKeywords = (text: string): string[] => {
+  const genericStopWords = new Set([
+    'why',
+    'the',
+    'how',
+    'what',
+    'there',
+    'this',
+    'that',
+    'from',
+    'with',
+    'your',
+    'codebase',
+    'repo',
+    'repository',
+    'commit',
+    'change',
+    'fails',
+    'failing',
+    'broken',
+    'issue',
+    'error',
+    'bug',
+    'is',
+    'are',
+    'was',
+    'were',
+    'in',
+    'on',
+    'at',
+    'to',
+    'for',
+    'a',
+    'an',
+    'of',
+    'and',
+    'or',
+    'but',
+    'if',
+    'else',
+    'please',
+    'tell',
+    'me',
+    'about',
+    'some',
+    'any',
+    'can',
+    'you',
+    'find',
+    'explain',
+  ]);
+
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // remove punctuation
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !genericStopWords.has(w));
+};
+
 export class ContextBuilder {
   /**
    * Compiles repository metadata, chronological commits list, and targeted
@@ -13,14 +72,23 @@ export class ContextBuilder {
     relevantDiffs?: { hash: string; diff: string }[];
   }): string {
     const { repoName, repoBranch, question, commits, relevantDiffs = [] } = options;
-    const queryLower = question.toLowerCase();
+    const keywords = getKeywords(question);
 
     // Rank commits: matches in message get higher priority, then chronological recency
     const sortedCommits = [...commits].sort((a, b) => {
-      const aMatches = a.message.toLowerCase().includes(queryLower);
-      const bMatches = b.message.toLowerCase().includes(queryLower);
-      if (aMatches && !bMatches) return -1;
-      if (!aMatches && bMatches) return 1;
+      let aScore = 0;
+      let bScore = 0;
+      const aMsg = a.message.toLowerCase();
+      const bMsg = b.message.toLowerCase();
+
+      keywords.forEach((kw) => {
+        if (aMsg.includes(kw)) aScore += 1;
+        if (bMsg.includes(kw)) bScore += 1;
+      });
+
+      if (bScore !== aScore) {
+        return bScore - aScore;
+      }
       return 0; // maintain chronological order (newest first)
     });
 
@@ -40,10 +108,12 @@ export class ContextBuilder {
       relevantDiffs.forEach(({ hash, diff }) => {
         context += `--- Commit ${hash.substring(0, 7)} Diff ---\n`;
         const diffLines = diff.split('\n');
-        
+
         // Truncate large diff files (limit to first 100 lines)
         if (diffLines.length > 100) {
-          context += diffLines.slice(0, 100).join('\n') + `\n[... Diff truncated: ${diffLines.length - 100} lines omitted to reduce token usage ...]\n`;
+          context +=
+            diffLines.slice(0, 100).join('\n') +
+            `\n[... Diff truncated: ${diffLines.length - 100} lines omitted to reduce token usage ...]\n`;
         } else {
           context += diff + `\n`;
         }

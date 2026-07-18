@@ -67,19 +67,23 @@ export default function Repositories() {
       {/* Header */}
       <div>
         <h2 className="text-xl font-bold text-white tracking-tight">Repositories</h2>
-        <p className="text-xs text-[#626875]">Connect local repositories to index history and enable AI investigation.</p>
+        <p className="text-xs text-[#626875]">
+          Connect local repositories to index history and enable AI investigation.
+        </p>
       </div>
 
       {/* Import Form */}
       <div className="p-5 bg-[#0c0d14] rounded-lg border border-[#1e2030] max-w-xl">
-        <h3 className="text-xs font-semibold text-white tracking-widest uppercase font-mono mb-4">Import Local Directory</h3>
+        <h3 className="text-xs font-semibold text-white tracking-widest uppercase font-mono mb-4">
+          Import Local Directory
+        </h3>
         <form onSubmit={handleImport} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-[10px] text-gray-500 font-mono uppercase">Absolute Path</label>
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="/path/to/local/git-repo" 
+              <input
+                type="text"
+                placeholder="/path/to/local/git-repo"
                 value={repoPath}
                 onChange={(e) => setRepoPath(e.target.value)}
                 disabled={importMutation.isPending}
@@ -96,8 +100,8 @@ export default function Repositories() {
             </div>
           )}
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!repoPath.trim() || importMutation.isPending}
             className="w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs py-2 rounded-md transition-colors cursor-pointer disabled:cursor-not-allowed disabled:bg-[#1e2030] disabled:text-gray-500 flex items-center justify-center gap-2"
           >
@@ -119,7 +123,8 @@ export default function Repositories() {
           <div className="space-y-1">
             <h4 className="text-xs font-semibold text-white">No local repository ready?</h4>
             <p className="text-[10px] text-purple-200/70 max-w-sm mt-0.5 leading-relaxed">
-              Explore TraceMind instantly using our pre-seeded authentication service repository with active database connection leaks.
+              Explore TraceMind instantly using our pre-seeded authentication service repository
+              with active database connection leaks.
             </p>
           </div>
           <button
@@ -136,8 +141,10 @@ export default function Repositories() {
 
       {/* List of active repositories */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">Active Workspace</h3>
-        
+        <h3 className="text-xs font-semibold text-white tracking-widest uppercase font-mono">
+          Active Workspace
+        </h3>
+
         {isLoading && (
           <div className="p-8 bg-[#0c0d14] rounded-lg border border-[#1e2030] animate-pulse h-16" />
         )}
@@ -155,7 +162,9 @@ export default function Repositories() {
                 <HardDrive className="w-5 h-5 text-purple-400" />
                 <div>
                   <h4 className="text-xs font-medium text-white">{activeRepo.name}</h4>
-                  <p className="text-[10px] text-gray-500 font-mono select-all">{activeRepo.path}</p>
+                  <p className="text-[10px] text-gray-500 font-mono select-all">
+                    {activeRepo.path}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-xs">
@@ -173,7 +182,6 @@ export default function Repositories() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

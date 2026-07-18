@@ -5,11 +5,7 @@ import { BadRequestError } from '../utils/errors.js';
 
 const gitService = new GitService();
 
-export const getCommitDetails = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getCommitDetails = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { hash } = req.params as { hash: string };
 
