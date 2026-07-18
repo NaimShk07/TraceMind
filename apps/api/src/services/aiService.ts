@@ -24,7 +24,7 @@ export class AiService {
 
     try {
       const model = this.genAI!.getGenerativeModel({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.5-flash',
         generationConfig: {
           responseMimeType: 'application/json',
           temperature: 0.3,
@@ -35,38 +35,17 @@ export class AiService {
         ],
       });
 
-      const systemPrompt = `You are TraceMind, an expert AI agent specializing in Git repository analysis and debugging.
-Your goal is to answer the user's question about the repository based on the provided context.
-
-You must respond ONLY with a valid JSON object matching the following structure:
+      const systemPrompt = `You are TraceMind, an AI agent for Git repository analysis.
+Answer using ONLY the provided context. Respond with a single valid JSON object:
 {
-  "answer": "A detailed explanation containing **Summary**, **Reasoning**, and **Suggested Fix** sections.",
-  "confidence": 0.95,
+  "answer": "**Summary**: ...\n\n**Reasoning**: ...\n\n**Suggested Fix**: ...",
+  "confidence": 0.0-1.0,
   "evidence": [
-    {
-      "type": "commit",
-      "title": "Fix memory leak in buffer allocation",
-      "description": "Found commit ec2999db which resolved the buffer allocation memory leak.",
-      "hash": "ec2999db8c785b8b55e788cc708f77c063ec4d6f"
-    }
+    { "type": "commit|file|diff", "title": "...", "description": "...", "hash": "(if commit/diff)", "filePath": "(if file/diff)", "snippet": "(optional)" }
   ]
-}
+}`;
 
-Instructions:
-- confidence must be a number between 0.0 and 1.0 representing your confidence in the answer.
-- The answer field must contain three labelled sections:
-    **Summary**: Brief overview of findings.
-    **Reasoning**: Step-by-step analysis of the evidence.
-    **Suggested Fix**: Actionable next steps or code recommendations.
-- evidence must contain a list of relevant files, commits, or diffs that justify your answer. Each item must have:
-    - type: 'commit', 'file', or 'diff'
-    - title: a short, descriptive title
-    - description: why this is relevant
-    - hash (optional): the commit hash if type is 'commit' or 'diff'
-    - filePath (optional): the file path if type is 'file' or 'diff'
-    - snippet (optional): relevant code or text snippet`;
-
-      const userMessage = `Repository Context:\n${context}\n\nUser Question:\n${question}`;
+      const userMessage = `Repository Context:\n${context}\n\nQuestion: ${question}`;
 
       const result = await model.generateContent([systemPrompt, userMessage]);
       const text = result.response.text();
