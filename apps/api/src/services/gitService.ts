@@ -11,13 +11,10 @@ const __dirname = path.dirname(__filename);
 
 export class GitService {
   /**
-   * Resolves, verifies, and returns the absolute path of a Git repository.
-   * Throws errors if directory does not exist or lacks a .git folder.
+   * Resolves repository path, falling back to workspace root if CWD resolution fails.
    */
-  private getGitInstance(repoPath: string): SimpleGit {
+  public resolveRepoPath(repoPath: string): string {
     let resolvedPath = path.resolve(repoPath);
-    
-    // Fallback: If path does not exist relative to CWD, check relative to the workspace root
     if (!fs.existsSync(resolvedPath)) {
       const workspaceRoot = path.resolve(__dirname, '../../../../');
       const alternatePath = path.resolve(workspaceRoot, repoPath);
@@ -25,6 +22,15 @@ export class GitService {
         resolvedPath = alternatePath;
       }
     }
+    return resolvedPath;
+  }
+
+  /**
+   * Resolves, verifies, and returns the absolute path of a Git repository.
+   * Throws errors if directory does not exist or lacks a .git folder.
+   */
+  private getGitInstance(repoPath: string): SimpleGit {
+    const resolvedPath = this.resolveRepoPath(repoPath);
     
     if (!fs.existsSync(resolvedPath)) {
       throw new NotFoundError(`Directory "${repoPath}" does not exist`);

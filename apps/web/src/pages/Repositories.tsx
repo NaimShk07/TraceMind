@@ -114,23 +114,25 @@ export default function Repositories() {
       </div>
 
       {/* Demo Repository Quick-start Card */}
-      <div className="p-5 bg-purple-950/10 border border-purple-500/20 rounded-lg max-w-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h4 className="text-xs font-semibold text-white">No local repository ready?</h4>
-          <p className="text-[10px] text-purple-200/70 max-w-sm mt-0.5 leading-relaxed">
-            Explore TraceMind instantly using our pre-seeded authentication service repository with active database connection leaks.
-          </p>
+      {!isLoading && !activeRepo && (
+        <div className="p-5 bg-purple-950/10 border border-purple-500/20 rounded-lg max-w-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fadeIn">
+          <div className="space-y-1">
+            <h4 className="text-xs font-semibold text-white">No local repository ready?</h4>
+            <p className="text-[10px] text-purple-200/70 max-w-sm mt-0.5 leading-relaxed">
+              Explore TraceMind instantly using our pre-seeded authentication service repository with active database connection leaks.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleImportDemo}
+            disabled={importMutation.isPending}
+            className="px-4 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md cursor-pointer transition-colors active:scale-95 disabled:opacity-50 shrink-0 flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Try Demo Repository</span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={handleImportDemo}
-          disabled={importMutation.isPending}
-          className="px-4 py-2 text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md cursor-pointer transition-colors active:scale-95 disabled:opacity-50 shrink-0 flex items-center justify-center gap-1.5"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Try Demo Repository</span>
-        </button>
-      </div>
+      )}
 
       {/* List of active repositories */}
       <div className="space-y-3">

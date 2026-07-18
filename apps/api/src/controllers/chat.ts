@@ -58,7 +58,8 @@ export const handleChat = async (
     }
 
     // 1. Gather git context: fetch last 30 commits to scan through
-    const git = simpleGit(repo.path);
+    const resolvedPath = gitService.resolveRepoPath(repo.path);
+    const git = simpleGit(resolvedPath);
     const logResult = await git.log({ maxCount: 30 });
 
     // Fetch list of changed files for each commit in parallel

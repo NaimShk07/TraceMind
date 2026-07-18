@@ -70,8 +70,25 @@ export default function Dashboard() {
     }
   ];
 
+  // Handle loading state first to prevent UI flickering
+  if (isRepoLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-6 w-36 bg-[#1e2030] rounded" />
+        <div className="h-4 w-72 bg-[#1e2030] rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="h-40 bg-[#0c0d14] border border-[#1e2030] rounded-xl" />
+            <div className="h-48 bg-[#0c0d14] border border-[#1e2030] rounded-xl" />
+          </div>
+          <div className="h-80 bg-[#0c0d14] border border-[#1e2030] rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
   // Render Empty State if no active repository imported yet
-  if (!isRepoLoading && !activeRepo) {
+  if (!activeRepo) {
     return (
       <div className="space-y-6 animate-slideUp">
         <div>
