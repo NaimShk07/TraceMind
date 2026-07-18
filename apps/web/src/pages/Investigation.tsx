@@ -245,7 +245,7 @@ const renderMarkdown = (text: string) => {
 
 export default function Investigation() {
   const [query, setQuery] = useState('');
-  const [, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([
     { 
       sender: 'assistant', 
@@ -350,6 +350,19 @@ export default function Investigation() {
 
     chatMutation.mutate({ question: questionText });
   };
+
+
+  const initialQuery = searchParams.get('q') || '';
+
+  useEffect(() => {
+    if (initialQuery && activeRepo) {
+      handleSend(initialQuery);
+      // Clear the query parameter to prevent triggering again on navigation changes
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('q');
+      setSearchParams(newParams);
+    }
+  }, [initialQuery, activeRepo]);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
