@@ -11,7 +11,7 @@ import {
   Cpu
 } from 'lucide-react';
 import type { RepositoryDetails, CommitMetadata } from '@tracemind/shared';
-
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export default function Dashboard() {
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ export default function Dashboard() {
   }>({
     queryKey: ['activeRepository'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:3001/repositories/active');
+      const res = await fetch(`${API_BASE}/repositories/active`);
       if (!res.ok) throw new Error('API offline');
       return res.json();
     },
@@ -37,7 +37,7 @@ export default function Dashboard() {
   }>({
     queryKey: ['recentCommits', activeRepo?.repositoryId],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3001/repositories/${activeRepo?.repositoryId}/commits?page=1&limit=5`);
+      const res = await fetch(`${API_BASE}/repositories/${activeRepo?.repositoryId}/commits?page=1&limit=5`);
       if (!res.ok) throw new Error('Failed to fetch commits');
       return res.json();
     },

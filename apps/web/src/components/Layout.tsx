@@ -16,6 +16,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import type { HealthResponse, CommitDetails } from '@tracemind/shared';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 const renderDiffLine = (line: string, index: number) => {
   if (line.startsWith('+') && !line.startsWith('+++')) {
     return (
@@ -59,7 +61,7 @@ export default function Layout() {
   }>({
     queryKey: ['commit', commitHash],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3001/commits/${commitHash}`);
+      const res = await fetch(`${API_BASE}/commits/${commitHash}`);
       if (!res.ok) throw new Error('Failed to fetch commit');
       return res.json();
     },
@@ -94,7 +96,7 @@ export default function Layout() {
   const { data, isError } = useQuery<{ success: boolean; data: HealthResponse }>({
     queryKey: ['health'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:3001/health');
+      const res = await fetch(`${API_BASE}/health`);
       if (!res.ok) throw new Error('API server offline');
       return res.json();
     },

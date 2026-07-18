@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import type { CommitMetadata, RepositoryDetails } from '@tracemind/shared';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 // Regular expression escaper for search highlighting
 const escapeRegExp = (str: string) => {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -91,7 +93,7 @@ export default function Timeline() {
   }>({
     queryKey: ['activeRepository'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:3001/repositories/active');
+      const res = await fetch(`${API_BASE}/repositories/active`);
       if (!res.ok) throw new Error('API offline');
       return res.json();
     },
@@ -111,7 +113,7 @@ export default function Timeline() {
     queryKey: ['commits', activeRepo?.repositoryId, debouncedSearch],
     queryFn: async ({ pageParam = 1 }) => {
       const res = await fetch(
-        `http://localhost:3001/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(debouncedSearch)}`
+        `${API_BASE}/repositories/${activeRepo?.repositoryId}/commits?page=${pageParam}&limit=10&search=${encodeURIComponent(debouncedSearch)}`
       );
       if (!res.ok) throw new Error('Failed to fetch commits');
       return res.json() as Promise<{ success: boolean; data: CommitMetadata[] }>;

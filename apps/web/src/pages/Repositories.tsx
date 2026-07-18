@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Folder, HardDrive, Loader2, AlertCircle } from 'lucide-react';
 import type { RepositoryDetails } from '@tracemind/shared';
-
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 export default function Repositories() {
   const [repoPath, setRepoPath] = useState('');
   const queryClient = useQueryClient();
@@ -15,7 +15,7 @@ export default function Repositories() {
   }>({
     queryKey: ['activeRepository'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:3001/repositories/active');
+      const res = await fetch(`${API_BASE}/repositories/active`);
       if (!res.ok) throw new Error('API server offline');
       return res.json();
     },
@@ -30,7 +30,7 @@ export default function Repositories() {
     string
   >({
     mutationFn: async (path) => {
-      const res = await fetch('http://localhost:3001/repositories/import', {
+      const res = await fetch(`${API_BASE}/repositories/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path }),

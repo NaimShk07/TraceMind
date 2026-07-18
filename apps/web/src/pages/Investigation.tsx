@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import type { RepositoryDetails, ChatResponse, EvidenceItem, CommitDetails } from '@tracemind/shared';
 import { motion } from 'framer-motion';
-
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 interface ChatMessage {
   sender: 'user' | 'assistant';
   text: string;
@@ -163,7 +163,7 @@ function EvidenceCard({ item, setSearchParams }: { item: EvidenceItem; setSearch
   }>({
     queryKey: ['commitDetails', hash],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3001/commits/${hash}`);
+      const res = await fetch(`${API_BASE}/commits/${hash}`);
       if (!res.ok) throw new Error('Failed to fetch commit details');
       return res.json();
     },
@@ -442,7 +442,7 @@ export default function Investigation() {
   }>({
     queryKey: ['activeRepository'],
     queryFn: async () => {
-      const res = await fetch('http://localhost:3001/repositories/active');
+      const res = await fetch(`${API_BASE}/repositories/active`);
       if (!res.ok) throw new Error('API offline');
       return res.json();
     }
@@ -457,7 +457,7 @@ export default function Investigation() {
     { question: string }
   >({
     mutationFn: async ({ question }) => {
-      const res = await fetch('http://localhost:3001/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
